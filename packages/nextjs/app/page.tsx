@@ -52,6 +52,18 @@ const Home: NextPage = () => {
     }
   }, [fidFromUrl]);
 
+  // Use miniapp user's FID as default if no FID is set
+  useEffect(() => {
+    // Only set miniapp user's FID if:
+    // 1. No URL parameter is present
+    // 2. No valid FID is currently selected (0 or invalid)
+    // 3. Miniapp user data is available
+    if (!fidFromUrl && (!selectedFid || selectedFid === 0) && user?.fid) {
+      setSelectedFid(user.fid);
+      router.push(`/?fid=${user.fid}`, { scroll: false });
+    }
+  }, [user?.fid, fidFromUrl, selectedFid, router]);
+
   // Handle FID selection - update both state and URL
   const handleSelectFid = (fid: number) => {
     setSelectedFid(fid);

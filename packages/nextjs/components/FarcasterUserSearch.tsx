@@ -98,7 +98,7 @@ export function FarcasterUserSearch({ onSelectUser }: FarcasterUserSearchProps) 
           type="text"
           value={query}
           onChange={e => setQuery(e.target.value)}
-          placeholder="Search by username, display name, or FID..."
+          placeholder="🔍 by username, display name, or FID..."
           className="input input-bordered w-full pl-12 pr-12 rounded-2xl"
         />
         {query && (

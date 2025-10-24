@@ -6,7 +6,7 @@ import { getScoreQuality } from "./UserQualityBadge";
 import { DeBankIcon, ProBadgeIcon, ZapperIcon } from "./icons";
 import { Alert, Avatar, Badge, Card, CardBody, InfoTooltip, Stat, StatsContainer } from "./ui";
 import { LoadingScreen } from "./ui/Loading";
-import { CheckIcon, ClipboardDocumentIcon } from "@heroicons/react/24/outline";
+import { ArrowUpIcon, CheckIcon, ClipboardDocumentIcon } from "@heroicons/react/24/outline";
 import { useFarcasterUser } from "~~/hooks/useFarcasterUser";
 import { miniappPatterns } from "~~/styles/design-system";
 import { notification } from "~~/utils/scaffold-eth";
@@ -25,7 +25,7 @@ const FALLBACK_AVATAR = "https://farcaster.xyz/avatar.png";
  */
 export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
   const { user, isLoading, error } = useFarcasterUser({ fid });
-  const { openLink } = useMiniapp();
+  const { openLink, isReady: isMiniappReady } = useMiniapp();
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
 
   const copyToClipboard = async (address: string) => {
@@ -46,7 +46,8 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
     }
   };
 
-  if (isLoading) {
+  // Show loading while miniapp is initializing or while fetching user data
+  if (!isMiniappReady || isLoading) {
     return <LoadingScreen message="Loading user profile..." />;
   }
 
@@ -58,8 +59,28 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
     );
   }
 
+  // Only show "Start Searching" when miniapp is loaded and no valid FID is selected
+  if (!user && !fid) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <div className="animate-bounce-arrow mb-6">
+          <ArrowUpIcon className="w-12 h-12 text-primary" />
+        </div>
+        <h3 className="text-2xl font-bold mb-2">Start Searching</h3>
+        <p className="text-base-content/70 max-w-md">
+          Use the search bar above to find Farcaster users by username, display name, or FID
+        </p>
+      </div>
+    );
+  }
+
+  // If we have a FID but no user data, show error
   if (!user) {
-    return <Alert variant="info">No user data available</Alert>;
+    return (
+      <Alert variant="warning" title="User not found">
+        No user found with FID {fid}
+      </Alert>
+    );
   }
 
   const userScore = user.experimental?.neynar_user_score;
@@ -77,15 +98,22 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
               {user.pro?.status === "subscribed" && (
                 <>
                   <ProBadgeIcon className="w-5 h-5 flex-shrink-0" />
-                  <InfoTooltip title="What is Farcaster Pro?">
+                  <InfoTooltip
+                    title={
+                      <>
+                        <ProBadgeIcon className="w-4 h-4 flex-shrink-0" />
+                        What is Farcaster Pro?
+                      </>
+                    }
+                  >
                     <p>
                       A <strong>Farcaster Pro user</strong> is a subscriber to the premium Farcaster membership, which
                       costs <strong>$120 per year</strong> and provides access to extra protocol-level features.
                     </p>
-                    <p>
-                      Subscriptions are paid through the app using a built-in wallet or <strong>12,000 warps</strong>,
-                      and subscribers receive a special badge and a limited-edition NFT if they are among the first
-                      10,000 to sign up.
+                    <p className="text-xs opacity-70 italic mb-0">
+                      <strong>Note:</strong> The Pro badge only indicates that the user has purchased a premium
+                      membership. It does not verify trustworthiness, reputation, or the authenticity of the account.
+                      Always evaluate users based on their actions and contributions to the network.
                     </p>
                   </InfoTooltip>
                 </>

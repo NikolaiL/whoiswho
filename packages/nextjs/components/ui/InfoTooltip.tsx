@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 
 interface InfoTooltipProps {
-  title: string;
+  title: React.ReactNode;
   children: React.ReactNode;
   className?: string;
 }
@@ -46,7 +46,7 @@ export function InfoTooltip({ title, children, className = "" }: InfoTooltipProp
         <div className="absolute z-50 mt-2 left-1/2 -translate-x-1/2 w-80 animate-fade-in">
           <div className="bg-base-100 border-2 border-base-300 rounded-xl shadow-xl p-4">
             <div className="flex items-start justify-between mb-2">
-              <h4 className="font-semibold text-sm">{title}</h4>
+              <h4 className="font-semibold text-sm flex items-center gap-2">{title}</h4>
               <button onClick={() => setIsOpen(false)} className="btn btn-ghost btn-xs btn-circle" aria-label="Close">
                 ✕
               </button>
