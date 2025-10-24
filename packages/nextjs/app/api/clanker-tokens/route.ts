@@ -10,6 +10,9 @@ import { NextRequest, NextResponse } from "next/server";
  * Caching: Results are cached for 5 minutes
  */
 
+// Force dynamic rendering (API routes can't be static)
+export const dynamic = "force-dynamic";
+
 // Enable caching for this route - revalidate every 5 minutes
 export const revalidate = 300;
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 //import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { NextPage } from "next";
@@ -13,7 +13,7 @@ import { useMiniapp } from "~~/components/MiniappProvider";
 
 //import { MiniappUserInfo } from "~~/components/MiniappUserInfo";
 
-const Home: NextPage = () => {
+function HomeContent() {
   //const { address: connectedAddress } = useAccount();
   const { user } = useMiniapp();
   const router = useRouter();
@@ -73,17 +73,33 @@ const Home: NextPage = () => {
   };
 
   return (
-    <>
-      <div className="flex items-center flex-col grow pt-10">
-        <div className="px-5 w-full">
-          {/* Search for Farcaster users */}
-          <FarcasterUserSearch onSelectUser={handleSelectFid} />
+    <div className="flex items-center flex-col grow pt-10">
+      <div className="px-5 w-full">
+        {/* Search for Farcaster users */}
+        <FarcasterUserSearch onSelectUser={handleSelectFid} />
 
-          {/* Display selected user profile */}
-          <FarcasterUserProfile fid={selectedFid} />
-        </div>
+        {/* Display selected user profile */}
+        <FarcasterUserProfile fid={selectedFid} />
       </div>
-    </>
+    </div>
+  );
+}
+
+const Home: NextPage = () => {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center flex-col grow pt-10">
+          <div className="px-5 w-full">
+            <div className="flex justify-center items-center min-h-[200px]">
+              <span className="loading loading-spinner loading-lg"></span>
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <HomeContent />
+    </Suspense>
   );
 };
 

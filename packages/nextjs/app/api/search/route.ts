@@ -13,6 +13,9 @@ import { NextRequest, NextResponse } from "next/server";
  * Special behavior: If query is a number (FID), also fetches user directly by FID
  */
 
+// Force dynamic rendering (API routes can't be static)
+export const dynamic = "force-dynamic";
+
 // Enable caching for this route - revalidate every 1 minute (60 seconds)
 export const revalidate = 60;
 
