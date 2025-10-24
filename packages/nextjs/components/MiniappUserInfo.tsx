@@ -1,35 +1,43 @@
 "use client";
 
-import Image from "next/image";
+import { Avatar, Badge, Card, CardBody } from "./ui";
+import { CheckCircleIcon, GlobeAltIcon } from "@heroicons/react/24/solid";
 import { useMiniapp } from "~~/components/MiniappProvider";
 
 export const MiniappUserInfo = () => {
   const { user, isReady, isMiniApp } = useMiniapp();
 
   return (
-    <div className="flex justify-center items-center space-x-2 flex-col mt-1">
-      <p className="my-1 font-medium">MiniApp Status:</p>
-      <p className="text-sm">
-        {isReady ? (isMiniApp ? "✅ Ready (MiniApp)" : "✅ Ready (WebApp, no User Context)") : "⏳ Loading..."}
-      </p>
-      {user && (
-        <div className="text-center">
-          <p className="text-sm font-medium">User Info:</p>
-          <p className="text-xs">FID: {user.fid}</p>
-          {user.username && <p className="text-xs">Username: {user.username}</p>}
-          {user.displayName && <p className="text-xs">Display Name: {user.displayName}</p>}
-          {user.pfpUrl && (
-            <Image
-              src={user.pfpUrl}
-              alt="Profile"
-              width={32}
-              height={32}
-              className="rounded-full mx-auto mt-1"
-              unoptimized
-            />
+    <Card variant="compact" padding="compact" className="max-w-md mx-auto my-4">
+      <CardBody>
+        {/* Status */}
+        <div className="flex items-center justify-center gap-2 mb-3">
+          <span className="text-sm font-medium">MiniApp Status:</span>
+          {isReady ? (
+            <Badge variant={isMiniApp ? "success" : "info"} size="sm" className="gap-1">
+              {isMiniApp ? <CheckCircleIcon className="w-3 h-3" /> : <GlobeAltIcon className="w-3 h-3" />}
+              {isMiniApp ? "MiniApp" : "WebApp"}
+            </Badge>
+          ) : (
+            <Badge variant="ghost" size="sm">
+              <span className="loading loading-spinner loading-xs mr-1"></span>
+              Loading...
+            </Badge>
           )}
         </div>
-      )}
-    </div>
+
+        {/* User Info */}
+        {user && (
+          <div className="flex items-center gap-3 p-3 bg-base-200 rounded-xl">
+            {user.pfpUrl && <Avatar src={user.pfpUrl} alt={user.displayName || "User"} size="md" />}
+            <div className="flex-1 min-w-0">
+              {user.displayName && <p className="font-semibold truncate">{user.displayName}</p>}
+              {user.username && <p className="text-sm text-base-content/70 truncate">@{user.username}</p>}
+              <p className="text-xs text-base-content/50">FID: {user.fid}</p>
+            </div>
+          </div>
+        )}
+      </CardBody>
+    </Card>
   );
 };

@@ -1,28 +1,65 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import type { NextPage } from "next";
-import { useAccount } from "wagmi";
+//import { useAccount } from "wagmi";
 import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+//import { Address } from "~~/components/scaffold-eth";
+import { FarcasterUserProfile } from "~~/components/FarcasterUserProfile";
+import { FarcasterUserSearch } from "~~/components/FarcasterUserSearch";
+import { useMiniapp } from "~~/components/MiniappProvider";
 import { MiniappUserInfo } from "~~/components/MiniappUserInfo";
-import { Address } from "~~/components/scaffold-eth";
 
 const Home: NextPage = () => {
-  const { address: connectedAddress } = useAccount();
+  //const { address: connectedAddress } = useAccount();
+  const { user } = useMiniapp();
+  const searchParams = useSearchParams();
+
+  // Sanitize and validate FID from URL
+  const sanitizeFid = (fidString: string | null): number | null => {
+    if (!fidString) return null;
+
+    // Remove any non-numeric characters
+    const cleaned = fidString.trim().replace(/[^0-9]/g, "");
+    if (cleaned === "") return null;
+
+    const parsed = parseInt(cleaned, 10);
+
+    // Validate: must be a positive integer within reasonable bounds
+    // FIDs start at 1 and are currently in the hundreds of thousands
+    if (isNaN(parsed) || parsed < 1 || parsed > 999999999) {
+      return null;
+    }
+
+    return parsed;
+  };
+
+  // Get FID from URL query parameter or use user's FID or default
+  const fidFromUrl = searchParams.get("fid");
+  const sanitizedFid = sanitizeFid(fidFromUrl);
+  const initialFid = sanitizedFid ?? user?.fid ?? 0;
+
+  const [selectedFid, setSelectedFid] = useState(initialFid);
+
+  // Update selected FID when URL parameter changes
+  useEffect(() => {
+    const sanitized = sanitizeFid(fidFromUrl);
+    if (sanitized !== null) {
+      setSelectedFid(sanitized);
+    }
+  }, [fidFromUrl]);
 
   return (
     <>
       <div className="flex items-center flex-col grow pt-10">
-        <div className="px-5">
-          <h1 className="text-center">
-            <span className="block text-2xl mb-2">Welcome to</span>
-            <span className="block text-4xl font-bold">Scaffold-ETH 2</span>
-            <span className="block text-xl font-bold">(miniapp extension)</span>
-          </h1>
-          <div className="flex justify-center items-center space-x-2 flex-col">
-            <p className="my-2 font-medium">Connected Address:</p>
-            <Address address={connectedAddress} />
-          </div>
+        <div className="px-5 w-full">
+          {/* Search for Farcaster users */}
+          <FarcasterUserSearch onSelectUser={setSelectedFid} />
+
+          {/* Display selected user profile */}
+          <FarcasterUserProfile fid={selectedFid} />
 
           {/* MiniApp User Info */}
           <MiniappUserInfo />
