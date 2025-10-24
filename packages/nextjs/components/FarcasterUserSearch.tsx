@@ -95,7 +95,7 @@ export function FarcasterUserSearch({ onSelectUser }: FarcasterUserSearchProps) 
           <MagnifyingGlassIcon className="w-5 h-5 text-base-content/50" />
         </div>
         <input
-          type="text"
+          type="search"
           name="q"
           value={query}
           onChange={e => setQuery(e.target.value)}
