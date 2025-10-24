@@ -4,10 +4,9 @@ import { useState } from "react";
 import { useMiniapp } from "./MiniappProvider";
 import { getScoreQuality } from "./UserQualityBadge";
 import { DeBankIcon, ProBadgeIcon, ZapperIcon } from "./icons";
-import { Alert, Avatar, Badge, Card, CardBody, Stat, StatsContainer } from "./ui";
+import { Alert, Avatar, Badge, Card, CardBody, InfoTooltip, Stat, StatsContainer } from "./ui";
 import { LoadingScreen } from "./ui/Loading";
 import { CheckIcon, ClipboardDocumentIcon } from "@heroicons/react/24/outline";
-import { CheckBadgeIcon } from "@heroicons/react/24/solid";
 import { useFarcasterUser } from "~~/hooks/useFarcasterUser";
 import { miniappPatterns } from "~~/styles/design-system";
 import { notification } from "~~/utils/scaffold-eth";
@@ -73,16 +72,23 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
         <div className={miniappPatterns.profileHeader}>
           <Avatar src={user.pfp_url || FALLBACK_AVATAR} alt={user.display_name} size="lg" />
           <div className="flex-1">
-            <div className="flex items-start gap-2 flex-wrap">
-              <div className="flex items-center gap-2">
-                <h2 className="text-2xl font-bold">{user.display_name}</h2>
-                {user.pro?.status === "subscribed" && <ProBadgeIcon className="w-5 h-5 flex-shrink-0" />}
-              </div>
-              {user.power_badge && (
-                <Badge variant="primary" size="sm" className="gap-1">
-                  <CheckBadgeIcon className="w-3 h-3" />
-                  Power User
-                </Badge>
+            <div className="flex items-center gap-2">
+              <h2 className="text-2xl font-bold">{user.display_name}</h2>
+              {user.pro?.status === "subscribed" && (
+                <>
+                  <ProBadgeIcon className="w-5 h-5 flex-shrink-0" />
+                  <InfoTooltip title="What is Farcaster Pro?">
+                    <p>
+                      A <strong>Farcaster Pro user</strong> is a subscriber to the premium Farcaster membership, which
+                      costs <strong>$120 per year</strong> and provides access to extra protocol-level features.
+                    </p>
+                    <p>
+                      Subscriptions are paid through the app using a built-in wallet or <strong>12,000 warps</strong>,
+                      and subscribers receive a special badge and a limited-edition NFT if they are among the first
+                      10,000 to sign up.
+                    </p>
+                  </InfoTooltip>
+                </>
               )}
             </div>
             <p className="text-sm text-base-content/70 mt-1">@{user.username}</p>

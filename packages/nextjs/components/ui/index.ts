@@ -8,6 +8,7 @@ export { Avatar, AvatarGroup } from "./Avatar";
 export { Badge } from "./Badge";
 export { Button } from "./Button";
 export { Card, CardHeader, CardBody, CardFooter } from "./Card";
+export { InfoTooltip } from "./InfoTooltip";
 export { Loading, LoadingScreen } from "./Loading";
 export { Section, SectionHeader } from "./Section";
 export { Stat, StatsContainer } from "./Stat";

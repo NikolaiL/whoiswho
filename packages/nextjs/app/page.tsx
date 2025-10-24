@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import type { NextPage } from "next";
 //import { useAccount } from "wagmi";
 import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
@@ -15,6 +15,7 @@ import { MiniappUserInfo } from "~~/components/MiniappUserInfo";
 const Home: NextPage = () => {
   //const { address: connectedAddress } = useAccount();
   const { user } = useMiniapp();
+  const router = useRouter();
   const searchParams = useSearchParams();
 
   // Sanitize and validate FID from URL
@@ -51,12 +52,19 @@ const Home: NextPage = () => {
     }
   }, [fidFromUrl]);
 
+  // Handle FID selection - update both state and URL
+  const handleSelectFid = (fid: number) => {
+    setSelectedFid(fid);
+    // Update URL with new FID
+    router.push(`/?fid=${fid}`, { scroll: false });
+  };
+
   return (
     <>
       <div className="flex items-center flex-col grow pt-10">
         <div className="px-5 w-full">
           {/* Search for Farcaster users */}
-          <FarcasterUserSearch onSelectUser={setSelectedFid} />
+          <FarcasterUserSearch onSelectUser={handleSelectFid} />
 
           {/* Display selected user profile */}
           <FarcasterUserProfile fid={selectedFid} />
