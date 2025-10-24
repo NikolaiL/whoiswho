@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 
 /**
- * API endpoint to fetch Farcaster user data from Neynar
+ * API endpoint to fetch Farcaster user data from Neynar and Farcaster client API
  * Only accessible from within the app
  *
  * Query params:
  * - fid: Farcaster ID (required)
  * - viewer_fid: Optional viewer's FID for context
+ *
+ * Data sources:
+ * - Neynar API: Primary user data with quality scores
+ * - Farcaster client API: Additional Farcaster-specific data (included as user.farcaster)
  *
  * Caching: Results are cached for 5 minutes to reduce API calls
  */
@@ -45,30 +49,64 @@ export async function GET(request: NextRequest) {
       neynarUrl.searchParams.append("viewer_fid", viewerFid);
     }
 
-    // Call Neynar API with caching
-    const response = await fetch(neynarUrl.toString(), {
-      method: "GET",
-      headers: {
-        "x-api-key": apiKey,
-        "Content-Type": "application/json",
-      },
-      // Cache the fetch request for 5 minutes
-      next: { revalidate: 300 },
-    });
+    // Build Farcaster client API URL
+    const farcasterUrl = new URL("https://client.farcaster.xyz/v2/user-by-fid");
+    farcasterUrl.searchParams.append("fid", fid);
 
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error("Neynar API error:", response.status, errorData);
-      return NextResponse.json({ error: "Failed to fetch user data from Neynar" }, { status: response.status });
+    // Fetch from both APIs in parallel
+    const [neynarResponse, farcasterResponse] = await Promise.all([
+      fetch(neynarUrl.toString(), {
+        method: "GET",
+        headers: {
+          "x-api-key": apiKey,
+          "Content-Type": "application/json",
+        },
+        // Cache the fetch request for 5 minutes
+        next: { revalidate: 300 },
+      }),
+      fetch(farcasterUrl.toString(), {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        // Cache the fetch request for 5 minutes
+        next: { revalidate: 300 },
+      }),
+    ]);
+
+    if (!neynarResponse.ok) {
+      const errorData = await neynarResponse.text();
+      console.error("Neynar API error:", neynarResponse.status, errorData);
+      return NextResponse.json({ error: "Failed to fetch user data from Neynar" }, { status: neynarResponse.status });
     }
 
-    const data = await response.json();
+    const neynarData = await neynarResponse.json();
+
+    // Parse Farcaster client data (optional - don't fail if it errors)
+    let farcasterData = null;
+    if (farcasterResponse.ok) {
+      try {
+        const farcasterResult = await farcasterResponse.json();
+        farcasterData = farcasterResult?.result || null;
+      } catch (err) {
+        console.error("Error parsing Farcaster client API response:", err);
+      }
+    } else {
+      console.error("Farcaster client API error:", farcasterResponse.status);
+    }
 
     // Return the first user from the array (since we're querying by single FID)
-    if (data.users && data.users.length > 0) {
+    if (neynarData.users && neynarData.users.length > 0) {
+      const user = neynarData.users[0];
+
+      // Add farcaster data if available
+      if (farcasterData) {
+        user.farcaster = farcasterData;
+      }
+
       // Return with cache headers
       return NextResponse.json(
-        { user: data.users[0] },
+        { user },
         {
           status: 200,
           headers: {

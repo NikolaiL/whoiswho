@@ -1,14 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { ClankerTokens } from "./ClankerTokens";
+import { FlagIndicator } from "./FlagIndicator";
 import { useMiniapp } from "./MiniappProvider";
-import { getScoreQuality } from "./UserQualityBadge";
 import { DeBankIcon, ProBadgeIcon, ZapperIcon } from "./icons";
-import { Alert, Avatar, Badge, Card, CardBody, InfoTooltip, Stat, StatsContainer } from "./ui";
+import { Alert, Avatar, Badge, Card, CardBody, InfoTooltip } from "./ui";
 import { LoadingScreen } from "./ui/Loading";
 import { ArrowUpIcon, CheckIcon, ClipboardDocumentIcon } from "@heroicons/react/24/outline";
 import { useFarcasterUser } from "~~/hooks/useFarcasterUser";
-import { miniappPatterns } from "~~/styles/design-system";
+import { calculateFollowerRatio, getNeynarScoreLevel, parseSpamLabel } from "~~/utils/profileMetrics";
 import { notification } from "~~/utils/scaffold-eth";
 
 interface FarcasterUserProfileProps {
@@ -25,7 +26,7 @@ const FALLBACK_AVATAR = "https://farcaster.xyz/avatar.png";
  */
 export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
   const { user, isLoading, error } = useFarcasterUser({ fid });
-  const { openLink, isReady: isMiniappReady } = useMiniapp();
+  const { openLink, openProfile, isReady: isMiniappReady } = useMiniapp();
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
 
   const copyToClipboard = async (address: string) => {
@@ -83,102 +84,212 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
     );
   }
 
-  const userScore = user.experimental?.neynar_user_score;
-  const scoreQuality = getScoreQuality(userScore);
+  // Prepare flag data
+  const neynarScore = user.score || 0;
+  const neynarLevel = getNeynarScoreLevel(neynarScore);
+
+  const spamLabel = user.farcaster?.extras?.publicSpamLabel;
+  const spamData = spamLabel ? parseSpamLabel(spamLabel) : null;
+
+  const followerCount = user.farcaster?.user?.followerCount || 0;
+  const followingCount = user.farcaster?.user?.followingCount || 0;
+  const ratioData = calculateFollowerRatio(followerCount, followingCount);
+
+  const handleProfileClick = () => {
+    openProfile({ fid: user.fid, username: user.username });
+  };
 
   return (
-    <Card variant="base" padding="default" hover className="max-w-2xl mx-auto my-6">
-      <CardBody>
-        {/* Profile Header */}
-        <div className={miniappPatterns.profileHeader}>
-          <Avatar src={user.pfp_url || FALLBACK_AVATAR} alt={user.display_name} size="lg" />
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <h2 className="text-2xl font-bold">{user.display_name}</h2>
-              {user.pro?.status === "subscribed" && (
-                <>
-                  <ProBadgeIcon className="w-5 h-5 flex-shrink-0" />
-                  <InfoTooltip
-                    title={
-                      <>
-                        <ProBadgeIcon className="w-4 h-4 flex-shrink-0" />
-                        What is Farcaster Pro?
-                      </>
-                    }
-                  >
-                    <p>
-                      A <strong>Farcaster Pro user</strong> is a subscriber to the premium Farcaster membership, which
-                      costs <strong>$120 per year</strong> and provides access to extra protocol-level features.
-                    </p>
-                    <p className="text-xs opacity-70 italic mb-0">
-                      <strong>Note:</strong> The Pro badge only indicates that the user has purchased a premium
-                      membership. It does not verify trustworthiness, reputation, or the authenticity of the account.
-                      Always evaluate users based on their actions and contributions to the network.
-                    </p>
-                  </InfoTooltip>
-                </>
-              )}
+    <>
+      {/* SECTION 1: USER PROFILE (BASIC INFO) */}
+      <Card variant="base" padding="default" className="max-w-2xl mx-auto my-6">
+        <CardBody>
+          <div className="flex items-start gap-4">
+            <div onClick={handleProfileClick} className="cursor-pointer">
+              <Avatar src={user.pfp_url || FALLBACK_AVATAR} alt={user.display_name} size="lg" />
             </div>
-            <p className="text-sm text-base-content/70 mt-1">@{user.username}</p>
-            <p className="text-xs text-base-content/50 mt-0.5">FID: {user.fid}</p>
-          </div>
-        </div>
-
-        {/* Bio */}
-        {user.profile?.bio?.text && <p className="mt-4 text-base leading-relaxed">{user.profile.bio.text}</p>}
-
-        {/* User Quality Score */}
-        <div className={miniappPatterns.scoreContainer}>
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold">User Quality Score</h3>
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold font-mono">
-                {userScore !== undefined ? userScore.toFixed(2) : "N/A"}
-              </span>
-              <Badge
-                variant={
-                  scoreQuality.level === "excellent" || scoreQuality.level === "good"
-                    ? "success"
-                    : scoreQuality.level === "decent"
-                      ? "info"
-                      : scoreQuality.level === "low"
-                        ? "warning"
-                        : "ghost"
-                }
-                size="md"
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2
+                  onClick={handleProfileClick}
+                  className="text-2xl font-bold cursor-pointer hover:opacity-80 transition-opacity"
+                >
+                  {user.display_name}
+                </h2>
+                {user.pro?.status === "subscribed" && (
+                  <>
+                    <ProBadgeIcon className="w-5 h-5 flex-shrink-0" />
+                    <InfoTooltip
+                      title={
+                        <>
+                          <ProBadgeIcon className="w-4 h-4 flex-shrink-0" />
+                          What is Farcaster Pro?
+                        </>
+                      }
+                    >
+                      <p>
+                        A <strong>Farcaster Pro user</strong> is a subscriber to the premium Farcaster membership, which
+                        costs <strong>$120 per year</strong> and provides access to extra protocol-level features.
+                      </p>
+                      <p className="text-xs opacity-70 italic mb-0">
+                        <strong>Note:</strong> The Pro badge only indicates that the user has purchased a premium
+                        membership. It does not verify trustworthiness, reputation, or the authenticity of the account.
+                        Always evaluate users based on their actions and contributions to the network.
+                      </p>
+                    </InfoTooltip>
+                  </>
+                )}
+              </div>
+              <p
+                onClick={handleProfileClick}
+                className="text-sm text-base-content/70 mt-1 cursor-pointer hover:opacity-80 transition-opacity"
               >
-                {scoreQuality.label}
-              </Badge>
+                @{user.username}
+              </p>
+              <p className="text-xs text-base-content/50 mt-0.5">FID: {user.fid}</p>
+              {user.profile?.bio?.text && <p className="mt-3 text-base leading-relaxed">{user.profile.bio.text}</p>}
             </div>
           </div>
 
-          <Alert variant="info" showIcon={false} className="text-xs">
-            <div className="space-y-2">
-              <p>
-                <strong>What is this?</strong> The Neynar score (0-1) measures account quality based on network
-                behavior. Higher scores indicate more valuable contributions.
-              </p>
-              <p>
-                <strong>Thresholds:</strong> 0.9+ Excellent · 0.7+ High Quality · 0.55+ Good · &lt;0.55 Low Quality
-              </p>
-              <p className="italic opacity-70">
-                Note: This is NOT proof of humanity. It measures value added to the network. Scores update weekly.
-              </p>
+          {/* Location */}
+          {user.profile?.location?.address && (
+            <div className="mt-4 flex items-center justify-center gap-2 text-sm text-base-content/70">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-4 h-4"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"
+                />
+              </svg>
+              <span>
+                {user.profile.location.address.city && `${user.profile.location.address.city}, `}
+                {user.profile.location.address.state && `${user.profile.location.address.state}, `}
+                {user.profile.location.address.country}
+              </span>
             </div>
-          </Alert>
-        </div>
+          )}
 
-        {/* Social Stats */}
-        <StatsContainer className="w-full">
-          <Stat title="Followers" value={user.follower_count.toLocaleString()} />
-          <Stat title="Following" value={user.following_count.toLocaleString()} />
-        </StatsContainer>
+          {/* Follower Stats */}
+          <div className="flex gap-4 mt-4 pt-4 border-t border-base-300">
+            <div className="flex-1 text-center">
+              <div className="text-xs text-base-content/60 mb-1">Followers</div>
+              <div className="text-xl font-bold">{followerCount.toLocaleString()}</div>
+            </div>
+            <div className="flex-1 text-center">
+              <div className="text-xs text-base-content/60 mb-1">Following</div>
+              <div className="text-xl font-bold">{followingCount.toLocaleString()}</div>
+            </div>
+          </div>
+        </CardBody>
+      </Card>
 
-        {/* Verified Addresses */}
-        {user.verified_addresses && user.verified_addresses.eth_addresses.length > 0 && (
-          <div className="mt-4">
-            <h3 className="font-semibold mb-3 flex items-center gap-2">
-              Verified Addresses
+      {/* SECTION 2: FLAGS (RISK INDICATORS) */}
+      <Card variant="base" padding="default" className="max-w-2xl mx-auto my-6">
+        <CardBody>
+          <h3 className="font-semibold text-lg mb-4">Account Flags</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Neynar Score Flag */}
+            <FlagIndicator
+              level={neynarLevel}
+              title="Neynar Score"
+              value={neynarScore.toFixed(2)}
+              explanation={
+                <>
+                  <p>
+                    <strong>What is this?</strong> The Neynar score (0-1) measures account quality based on network
+                    behavior. Higher scores indicate more valuable contributions.
+                  </p>
+                  <p className="mt-2">
+                    <strong>Thresholds:</strong>
+                  </p>
+                  <ul className="list-disc list-inside text-xs mt-1 space-y-1">
+                    <li className="text-success">≥ 0.7: Low Risk</li>
+                    <li className="text-warning">0.55-0.69: Medium Risk</li>
+                    <li className="text-error">&lt; 0.55: High Risk</li>
+                  </ul>
+                </>
+              }
+            />
+
+            {/* Spam Label Flag */}
+            {spamData ? (
+              <FlagIndicator
+                level={spamData.level}
+                title="Spam Score"
+                value={spamData.score}
+                subtitle={spamData.text}
+                explanation={
+                  <>
+                    <p>
+                      <strong>What is this?</strong> A public spam assessment from the Farcaster network indicating the
+                      likelihood of spammy behavior.
+                    </p>
+                    <p className="mt-2">
+                      <strong>Thresholds:</strong>
+                    </p>
+                    <ul className="list-disc list-inside text-xs mt-1 space-y-1">
+                      <li className="text-success">2: Unlikely to spam</li>
+                      <li className="text-warning">1: Possible spam</li>
+                      <li className="text-error">0: Likely spam</li>
+                    </ul>
+                  </>
+                }
+              />
+            ) : (
+              <div className="rounded-xl border-2 border-base-300 p-4 bg-base-200/50">
+                <h4 className="font-semibold text-sm mb-2">Spam Score</h4>
+                <div className="text-base-content/50 text-sm">No data available</div>
+              </div>
+            )}
+
+            {/* Follower Ratio Flag */}
+            {followerCount > 0 || followingCount > 0 ? (
+              <FlagIndicator
+                level={ratioData.level}
+                title="Follower Ratio"
+                value={ratioData.ratio.toFixed(2)}
+                subtitle={ratioData.display}
+                explanation={
+                  <>
+                    <p>
+                      <strong>What is this?</strong> The ratio of followers to following (followers ÷ following). This
+                      helps identify bot-like behavior patterns.
+                    </p>
+                    <p className="mt-2">
+                      <strong>Thresholds:</strong>
+                    </p>
+                    <ul className="list-disc list-inside text-xs mt-1 space-y-1">
+                      <li className="text-success">≥ 0.8: Low Risk - Healthy balance, organic growth</li>
+                      <li className="text-warning">0.2-0.79: Medium Risk - Building network or newer account</li>
+                      <li className="text-error">&lt; 0.2: High Risk - Possible bot or follow-for-follow behavior</li>
+                    </ul>
+                  </>
+                }
+              />
+            ) : (
+              <div className="rounded-xl border-2 border-base-300 p-4 bg-base-200/50">
+                <h4 className="font-semibold text-sm mb-2">Follower Ratio</h4>
+                <div className="text-base-content/50 text-sm">No data available</div>
+              </div>
+            )}
+          </div>
+        </CardBody>
+      </Card>
+
+      {/* SECTION 3: CONNECTED WALLETS */}
+      {user.verified_addresses && user.verified_addresses.eth_addresses.length > 0 && (
+        <Card variant="base" padding="default" className="max-w-2xl mx-auto my-6">
+          <CardBody>
+            <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+              Connected Wallets
               <Badge variant="success" size="sm">
                 {user.verified_addresses.eth_addresses.length}
               </Badge>
@@ -210,14 +321,14 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
                           </button>
                           <button
                             onClick={() => openLink(`https://debank.com/profile/${address}`)}
-                            className="w-10 h-10  !min-h-0 !p-0 btn btn-circle btn-ghost hover:btn-primary flex items-center justify-center transition-all"
+                            className="w-10 h-10 !min-h-0 !p-0 btn btn-circle btn-ghost opacity-50 hover:opacity-100 hover:btn-primary flex items-center justify-center transition-all"
                             title="View on DeBank"
                           >
                             <DeBankIcon className="w-4 h-4 shrink-0" />
                           </button>
                           <button
                             onClick={() => openLink(`https://zapper.xyz/account/${address}`)}
-                            className="w-10 h-10  !min-h-0 !p-0 btn btn-circle btn-ghost hover:btn-primary flex items-center justify-center transition-all"
+                            className="w-10 h-10 !min-h-0 !p-0 btn btn-circle btn-ghost opacity-50 hover:opacity-100 hover:btn-primary flex items-center justify-center transition-all"
                             title="View on Zapper"
                           >
                             <ZapperIcon className="w-6 h-6 shrink-0" />
@@ -229,9 +340,12 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
                 </tbody>
               </table>
             </div>
-          </div>
-        )}
-      </CardBody>
-    </Card>
+          </CardBody>
+        </Card>
+      )}
+
+      {/* SECTION 4: CLANKER TOKENS */}
+      <ClankerTokens fid={user.fid} />
+    </>
   );
 }

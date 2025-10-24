@@ -113,6 +113,30 @@ export interface NeynarUser {
   };
   viewer_context?: NeynarViewerContext;
   score: number;
+  farcaster?: {
+    user?: {
+      fid: number;
+      displayName: string;
+      username: string;
+      followerCount: number;
+      followingCount: number;
+      pfp?: {
+        url: string;
+        verified: boolean;
+      };
+      profile?: any;
+      viewerContext?: any;
+    };
+    collectionsOwned?: any[];
+    extras?: {
+      fid: number;
+      custodyAddress: string;
+      ethWallets?: string[];
+      solanaWallets?: string[];
+      walletLabels?: any[];
+      publicSpamLabel?: string;
+    };
+  };
 }
 
 export interface NeynarUserResponse {
