@@ -1,13 +1,12 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect } from "react";
 //import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { NextPage } from "next";
 //import { useAccount } from "wagmi";
 //import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 //import { Address } from "~~/components/scaffold-eth";
-import { FarcasterUserProfile } from "~~/components/FarcasterUserProfile";
 import { FarcasterUserSearch } from "~~/components/FarcasterUserSearch";
 import { useMiniapp } from "~~/components/MiniappProvider";
 
@@ -38,38 +37,20 @@ function HomeContent() {
     return parsed;
   };
 
-  // Get FID from URL query parameter or use user's FID or default
+  // Get FID from URL query parameter
   const fidFromUrl = searchParams.get("fid");
   const sanitizedFid = sanitizeFid(fidFromUrl);
-  const initialFid = sanitizedFid ?? user?.fid ?? 0;
 
-  const [selectedFid, setSelectedFid] = useState(initialFid);
-
-  // Update selected FID when URL parameter changes
+  // Auto-redirect to miniapp user's profile if no FID in URL
   useEffect(() => {
-    const sanitized = sanitizeFid(fidFromUrl);
-    if (sanitized !== null) {
-      setSelectedFid(sanitized);
+    if (!sanitizedFid && user?.fid) {
+      router.push(`/profile/${user.fid}`);
     }
-  }, [fidFromUrl]);
+  }, [user?.fid, sanitizedFid, router]);
 
-  // Use miniapp user's FID as default if no FID is set
-  useEffect(() => {
-    // Only set miniapp user's FID if:
-    // 1. No URL parameter is present
-    // 2. No valid FID is currently selected (0 or invalid)
-    // 3. Miniapp user data is available
-    if (!fidFromUrl && (!selectedFid || selectedFid === 0) && user?.fid) {
-      setSelectedFid(user.fid);
-      router.push(`/?fid=${user.fid}`, { scroll: false });
-    }
-  }, [user?.fid, fidFromUrl, selectedFid, router]);
-
-  // Handle FID selection - update both state and URL
+  // Handle FID selection - redirect to profile page
   const handleSelectFid = (fid: number) => {
-    setSelectedFid(fid);
-    // Update URL with new FID
-    router.push(`/?fid=${fid}`, { scroll: false });
+    router.push(`/profile/${fid}`);
   };
 
   return (
@@ -78,8 +59,16 @@ function HomeContent() {
         {/* Search for Farcaster users */}
         <FarcasterUserSearch onSelectUser={handleSelectFid} />
 
-        {/* Display selected user profile */}
-        <FarcasterUserProfile fid={selectedFid} />
+        {/* Welcome message when no user is selected */}
+        {!fidFromUrl && (
+          <div className="max-w-2xl mx-auto my-12 text-center">
+            <h1 className="text-4xl font-bold mb-4">🔍 WhoIsWho</h1>
+            <p className="text-xl text-base-content/70 mb-2">Verify Farcaster users before you engage</p>
+            <p className="text-base text-base-content/50">
+              Check reputation scores, verify identities, and avoid spam accounts
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
