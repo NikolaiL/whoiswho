@@ -170,6 +170,22 @@
   @apply outline-none ring-2 ring-secondary ring-offset-2;
 }
 
+/* Input focus styles - softer border in dark mode */
+.input:focus,
+.textarea:focus,
+.select:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+[data-theme="dark"] .input:focus,
+[data-theme="dark"] .textarea:focus,
+[data-theme="dark"] .select:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-color: var(--color-accent);
+}
+
 /* Scrollbar styling (webkit browsers) */
 ::-webkit-scrollbar {
   width: 8px;
