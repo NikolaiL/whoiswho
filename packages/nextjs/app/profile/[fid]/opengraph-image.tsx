@@ -10,6 +10,7 @@ export const size = {
   height: 800,
 };
 export const contentType = "image/png";
+export const revalidate = 600; // Revalidate every 10 minutes
 
 async function fetchUserData(fid: string) {
   // Use our own API endpoint which fetches from both Neynar and Farcaster
@@ -22,7 +23,7 @@ async function fetchUserData(fid: string) {
     headers: {
       "Content-Type": "application/json",
     },
-    next: { revalidate: 300 },
+    next: { revalidate: revalidate }, // 10 minutes to match image revalidation
   });
 
   if (!response.ok) {
@@ -46,7 +47,7 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
       return new Response(Buffer.from(thumbnailBuffer as unknown as ArrayBuffer), {
         headers: {
           "Content-Type": "image/jpeg",
-          "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
+          "Cache-Control": "public, s-maxage=600, stale-while-revalidate=3600",
         },
       });
     } catch (error) {
