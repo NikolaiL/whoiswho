@@ -429,52 +429,58 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
             </div>
 
             {/* Buttons Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className={miniappUser?.fid === fid ? "grid grid-cols-1 sm:grid-cols-2 gap-3" : ""}>
               {/* Share Button */}
               <button onClick={handleShare} disabled={isSharing} className="btn btn-primary w-full gap-2">
                 <ShareIcon className="w-5 h-5" />
                 {isSharing ? "Opening Composer..." : "Share on Farcaster"}
               </button>
 
-              {/* Mint Button */}
-              <button
-                onClick={handleMint}
-                disabled={isMinting || !isMiniappReady || !address || miniappUser?.fid !== fid}
-                className="btn btn-secondary w-full gap-2"
-              >
-                {isMinting ? (
-                  <>
-                    <span className="loading loading-spinner loading-sm"></span>
-                    {mintStep === "verifying" && "Verifying..."}
-                    {mintStep === "generating" && "Generating..."}
-                    {mintStep === "uploading" && "Uploading..."}
-                    {mintStep === "minting" && "Minting..."}
-                    {mintStep === "success" && "✓ Minted!"}
-                  </>
-                ) : (
-                  <>
-                    <ArrowUpIcon className="w-5 h-5" />
-                    Mint as NFT {mintPrice && mintPrice > 0n ? `(${formatEther(mintPrice)} ETH)` : "(🔑Free Today)"}
-                  </>
-                )}
-              </button>
+              {/* Mint Button, should only show if fid is the same as the miniapp user fid */}
+              {miniappUser?.fid === fid && (
+                <button
+                  onClick={handleMint}
+                  disabled={isMinting || !isMiniappReady || !address || miniappUser?.fid !== fid}
+                  className="btn btn-secondary w-full gap-2"
+                >
+                  {isMinting ? (
+                    <>
+                      <span className="loading loading-spinner loading-sm"></span>
+                      {mintStep === "verifying" && "Verifying..."}
+                      {mintStep === "generating" && "Generating..."}
+                      {mintStep === "uploading" && "Uploading..."}
+                      {mintStep === "minting" && "Minting..."}
+                      {mintStep === "success" && "✓ Minted!"}
+                    </>
+                  ) : (
+                    <>
+                      <ArrowUpIcon className="w-5 h-5" />
+                      Mint as NFT {mintPrice && mintPrice > 0n ? `(${formatEther(mintPrice)} ETH)` : "(🔑Free Today)"}
+                    </>
+                  )}
+                </button>
+              )}
             </div>
 
-            {/* Show mint count if user has minted before */}
-            {userMintCount > 0 && (
-              <div className="text-sm text-center text-base-content/60">
-                You&apos;ve minted {userMintCount} snapshot{userMintCount !== 1 ? "s" : ""} of this profile
-              </div>
-            )}
+            {miniappUser?.fid === fid && (
+              <>
+                {/* Show mint count if user has minted before */}
+                {userMintCount > 0 && (
+                  <div className="text-sm text-center text-base-content/60">
+                    You&apos;ve minted {userMintCount} snapshot{userMintCount !== 1 ? "s" : ""} of this profile
+                  </div>
+                )}
 
-            {/* Show message if viewing someone else's profile */}
-            {miniappUser?.fid && miniappUser.fid !== fid && (
-              <div className="text-sm text-center text-warning">You can only mint your own profile</div>
-            )}
+                {/* Show message if viewing someone else's profile */}
+                {miniappUser?.fid && miniappUser.fid !== fid && (
+                  <div className="text-sm text-center text-warning">You can only mint your own profile</div>
+                )}
 
-            {/* Show message if wallet not connected */}
-            {!address && miniappUser?.fid === fid && (
-              <div className="text-sm text-center text-info">Connect your wallet to mint NFT</div>
+                {/* Show message if wallet not connected */}
+                {!address && miniappUser?.fid === fid && (
+                  <div className="text-sm text-center text-info">Connect your wallet to mint NFT</div>
+                )}
+              </>
             )}
           </div>
         </CardBody>
