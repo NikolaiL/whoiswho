@@ -78,5 +78,15 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
   }
 
   // Use the shared utility function to generate the profile image
-  return generateProfileImage({ user, size });
+  const imageResponse = await generateProfileImage({ user, size });
+
+  // Convert ImageResponse to Response with custom cache headers
+  const imageBuffer = await imageResponse.arrayBuffer();
+
+  return new Response(imageBuffer, {
+    headers: {
+      "Content-Type": "image/png",
+      "Cache-Control": "public, s-maxage=600, stale-while-revalidate=3600",
+    },
+  });
 }
