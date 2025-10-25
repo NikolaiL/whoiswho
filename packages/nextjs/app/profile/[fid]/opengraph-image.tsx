@@ -206,8 +206,8 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
             >
               <img
                 style={{
-                  width: "280px",
-                  height: "280px",
+                  width: "300px",
+                  height: "300px",
                   borderRadius: "30px",
                   objectFit: "cover",
                   border: `4px solid ${colors.base300}`,
@@ -261,6 +261,7 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
                   display: "flex",
                   alignItems: "center",
                   gap: "10px",
+                  marginTop: "-10px",
                 }}
               >
                 <span>{user.display_name}</span>
@@ -271,7 +272,7 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
                 style={{
                   fontSize: "32px",
                   color: colors.accent,
-                  marginTop: "-10px",
+                  marginTop: "-23px",
                   display: "flex",
                 }}
               >
@@ -283,7 +284,7 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
                 style={{
                   display: "flex",
                   gap: "40px",
-                  marginTop: "20px",
+                  marginTop: "0px",
                 }}
               >
                 <div
@@ -294,7 +295,7 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
                 >
                   <div
                     style={{
-                      fontSize: "28px",
+                      fontSize: "32px",
                       fontWeight: "700",
                       color: colors.neutral,
                       display: "flex",
@@ -304,7 +305,7 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
                   </div>
                   <div
                     style={{
-                      fontSize: "16px",
+                      fontSize: "20px",
                       color: colors.neutral,
                       opacity: 0.6,
                       display: "flex",
@@ -321,7 +322,7 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
                 >
                   <div
                     style={{
-                      fontSize: "28px",
+                      fontSize: "32px",
                       fontWeight: "700",
                       color: colors.neutral,
                       display: "flex",
@@ -331,7 +332,7 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
                   </div>
                   <div
                     style={{
-                      fontSize: "16px",
+                      fontSize: "20px",
                       color: colors.neutral,
                       opacity: 0.6,
                       display: "flex",
@@ -347,7 +348,7 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
                 style={{
                   display: "flex",
                   gap: "15px",
-                  marginTop: "25px",
+                  marginTop: "3px",
                   width: "100%",
                 }}
               >
@@ -356,6 +357,7 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
                   style={{
                     display: "flex",
                     flexDirection: "column",
+                    alignItems: "center",
                     backgroundColor:
                       neynarLevel === "green"
                         ? "rgba(16, 185, 129, 0.15)"
@@ -370,7 +372,7 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
                 >
                   <div
                     style={{
-                      fontSize: "24px",
+                      fontSize: "54px",
                       fontWeight: "700",
                       color:
                         neynarLevel === "green"
@@ -385,7 +387,7 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
                   </div>
                   <div
                     style={{
-                      fontSize: "14px",
+                      fontSize: "20px",
                       color: colors.neutral,
                       opacity: 0.8,
                       display: "flex",
@@ -400,6 +402,7 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
                   style={{
                     display: "flex",
                     flexDirection: "column",
+                    alignItems: "center",
                     backgroundColor:
                       spamLevel === "green"
                         ? "rgba(16, 185, 129, 0.15)"
@@ -414,7 +417,7 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
                 >
                   <div
                     style={{
-                      fontSize: "24px",
+                      fontSize: "54px",
                       fontWeight: "700",
                       color:
                         spamLevel === "green" ? colors.success : spamLevel === "yellow" ? colors.warning : colors.error,
@@ -425,7 +428,7 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
                   </div>
                   <div
                     style={{
-                      fontSize: "14px",
+                      fontSize: "20px",
                       color: colors.neutral,
                       opacity: 0.8,
                       display: "flex",
@@ -440,6 +443,7 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
                   style={{
                     display: "flex",
                     flexDirection: "column",
+                    alignItems: "center",
                     backgroundColor:
                       ratioLevel === "green"
                         ? "rgba(16, 185, 129, 0.15)"
@@ -454,7 +458,7 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
                 >
                   <div
                     style={{
-                      fontSize: "24px",
+                      fontSize: "54px",
                       fontWeight: "700",
                       color:
                         ratioLevel === "green"
@@ -465,17 +469,17 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
                       display: "flex",
                     }}
                   >
-                    {followerRatio.toFixed(2)}
+                    {followerRatio.toFixed(1)}
                   </div>
                   <div
                     style={{
-                      fontSize: "14px",
+                      fontSize: "20px",
                       color: colors.neutral,
                       opacity: 0.8,
                       display: "flex",
                     }}
                   >
-                    F/F Ratio
+                    Follower Ratio
                   </div>
                 </div>
               </div>
@@ -495,7 +499,7 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
               display: "flex",
             }}
           >
-            Verify Farcaster users • Check reputation • Avoid spam
+            Verify Users • Check Reputation • Avoid Spam
           </div>
         </div>
       </div>
