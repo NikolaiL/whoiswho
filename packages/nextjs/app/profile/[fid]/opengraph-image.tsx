@@ -98,7 +98,7 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
   const followingCount = user.farcaster?.user?.followingCount || user.following_count || 0;
 
   // Get banner image if available
-  const bannerUrl = user.farcaster?.user?.profile?.bannerImageUrl;
+  const bannerUrl = user.farcaster?.user?.profile?.bannerImageUrl || "https://picsum.photos/300/200";
 
   // Calculate flag levels
   const neynarLevel = neynarScore >= 0.7 ? "green" : neynarScore >= 0.55 ? "yellow" : "red";
