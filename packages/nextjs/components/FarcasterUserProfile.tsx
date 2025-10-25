@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { ClankerTokens } from "./ClankerTokens";
 import { FlagIndicator } from "./FlagIndicator";
 import { useMiniapp } from "./MiniappProvider";
 import { DeBankIcon, ProBadgeIcon, ZapperIcon } from "./icons";
 import { Alert, Avatar, Badge, Card, CardBody, InfoTooltip } from "./ui";
 import { LoadingScreen } from "./ui/Loading";
-import { ArrowUpIcon, CheckIcon, ClipboardDocumentIcon } from "@heroicons/react/24/outline";
+import { ArrowUpIcon, CheckIcon, ClipboardDocumentIcon, ShareIcon } from "@heroicons/react/24/outline";
 import { useFarcasterUser } from "~~/hooks/useFarcasterUser";
 import { calculateFollowerRatio, getNeynarScoreLevel, parseSpamLabel } from "~~/utils/profileMetrics";
 import { notification } from "~~/utils/scaffold-eth";
@@ -26,8 +27,9 @@ const FALLBACK_AVATAR = "https://farcaster.xyz/avatar.png";
  */
 export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
   const { user, isLoading, error } = useFarcasterUser({ fid });
-  const { openLink, openProfile, isReady: isMiniappReady } = useMiniapp();
+  const { openLink, openProfile, composeCast, isReady: isMiniappReady } = useMiniapp();
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
+  const [isSharing, setIsSharing] = useState(false);
 
   const copyToClipboard = async (address: string) => {
     try {
@@ -44,6 +46,24 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
     } catch (err) {
       console.error("Failed to copy:", err);
       notification.error("Failed to copy address");
+    }
+  };
+
+  const handleShare = async () => {
+    if (!user) return;
+    setIsSharing(true);
+    try {
+      const profileUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/profile/${user.fid}`;
+      await composeCast({
+        text: `Check out @${user.username}'s profile on WhoIsWho!\n\nVerify reputation, check flags, and avoid spam accounts.`,
+        embeds: [profileUrl],
+      });
+      notification.success("Cast composer opened!");
+    } catch (err) {
+      console.error("Failed to share:", err);
+      notification.error("Failed to open cast composer");
+    } finally {
+      setIsSharing(false);
     }
   };
 
@@ -280,6 +300,31 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
                 <div className="text-base-content/50 text-sm">No data available</div>
               </div>
             )}
+          </div>
+        </CardBody>
+      </Card>
+
+      {/* SECTION 2.5: WHOISWHO ID CARD */}
+      <Card variant="base" padding="default" className="max-w-2xl mx-auto my-6">
+        <CardBody>
+          <h3 className="font-semibold text-lg mb-4">WhoIsWho ID Card</h3>
+          <div className="space-y-4">
+            {/* OG Image Preview */}
+            <div className="relative w-full aspect-[3/2] rounded-lg overflow-hidden border-2 border-base-300">
+              <Image
+                src={`/profile/${user.fid}/opengraph-image`}
+                alt={`${user.display_name} (@${user.username}) profile card`}
+                fill
+                className="object-cover"
+                unoptimized
+              />
+            </div>
+
+            {/* Share Button */}
+            <button onClick={handleShare} disabled={isSharing} className="btn btn-primary w-full gap-2">
+              <ShareIcon className="w-5 h-5" />
+              {isSharing ? "Opening Composer..." : "Share on Farcaster"}
+            </button>
           </div>
         </CardBody>
       </Card>
