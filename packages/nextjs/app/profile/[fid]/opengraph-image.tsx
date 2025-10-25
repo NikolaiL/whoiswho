@@ -1,6 +1,8 @@
 import { ImageResponse } from "next/og";
+import { readFile } from "fs/promises";
+import { join } from "path";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 export const alt = "Farcaster User Profile";
 export const size = {
   width: 1200,
@@ -38,7 +40,7 @@ async function fetchUserData(fid: string) {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to fetch user data");
+    return null;
   }
 
   const data = await response.json();
@@ -50,28 +52,42 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
   const user = await fetchUserData(fid);
 
   if (!user) {
-    // Return a default error image
-    return new ImageResponse(
-      (
-        <div
-          style={{
-            width: "1200px",
-            height: "800px",
-            background: "#0f172a",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#f1f5f9",
-            fontSize: "48px",
-          }}
-        >
-          User not found
-        </div>
-      ),
-      {
-        ...size,
-      },
-    );
+    // Return the default thumbnail.jpg from public directory
+    try {
+      const thumbnailPath = join(process.cwd(), "public", "thumbnail.jpg");
+      console.log("thumbnailPath", thumbnailPath);
+      const thumbnailBuffer = await readFile(thumbnailPath);
+      return new Response(Buffer.from(thumbnailBuffer as unknown as ArrayBuffer), {
+        headers: {
+          "Content-Type": "image/jpeg",
+          "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
+        },
+      });
+    } catch (error) {
+      console.error("Error loading thumbnail:", error);
+      // Fallback to a simple error image if thumbnail is not found
+      return new ImageResponse(
+        (
+          <div
+            style={{
+              width: "1200px",
+              height: "800px",
+              background: "#0f172a",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#f1f5f9",
+              fontSize: "48px",
+            }}
+          >
+            User not found
+          </div>
+        ),
+        {
+          ...size,
+        },
+      );
+    }
   }
 
   const avatarUrl = user.pfp_url || "https://farcaster.xyz/avatar.png";
