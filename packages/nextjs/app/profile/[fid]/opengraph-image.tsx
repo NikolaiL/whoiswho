@@ -47,6 +47,27 @@ async function fetchUserData(fid: string) {
   return data.user || null;
 }
 
+async function validateImageUrl(url: string | undefined, fallbackUrl: string): Promise<string> {
+  if (!url) {
+    return fallbackUrl;
+  }
+
+  try {
+    const response = await fetch(url, {
+      method: "HEAD",
+      signal: AbortSignal.timeout(3000), // 3 second timeout
+    });
+
+    if (response.ok && response.headers.get("content-type")?.startsWith("image/")) {
+      return url;
+    }
+  } catch (error) {
+    console.error(`Failed to load image from ${url}:`, error);
+  }
+
+  return fallbackUrl;
+}
+
 export default async function Image({ params }: { params: Promise<{ fid: string }> }) {
   const { fid } = await params;
   const user = await fetchUserData(fid);
@@ -90,15 +111,19 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
     }
   }
 
-  const avatarUrl = user.pfp_url || "https://farcaster.xyz/avatar.png";
+  // Validate and get avatar URL with fallback
+  const FALLBACK_AVATAR = "https://farcaster.xyz/avatar.png";
+  const avatarUrl = await validateImageUrl(user.pfp_url, FALLBACK_AVATAR);
+
+  // Validate and get banner URL with fallback
+  const FALLBACK_BANNER = "https://picsum.photos/1200/800";
+  const bannerUrl = await validateImageUrl(user.farcaster?.user?.profile?.bannerImageUrl, FALLBACK_BANNER);
+
   const neynarScore = user.score || 0;
 
   // Get follower/following counts from Farcaster data (preferred) or fallback to Neynar
   const followerCount = user.farcaster?.user?.followerCount || user.follower_count || 0;
   const followingCount = user.farcaster?.user?.followingCount || user.following_count || 0;
-
-  // Get banner image if available
-  const bannerUrl = user.farcaster?.user?.profile?.bannerImageUrl || "https://picsum.photos/300/200";
 
   // Calculate flag levels
   const neynarLevel = neynarScore >= 0.7 ? "green" : neynarScore >= 0.55 ? "yellow" : "red";
