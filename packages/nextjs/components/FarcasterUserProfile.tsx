@@ -55,7 +55,7 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
     try {
       const profileUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/profile/${user.fid}`;
       await composeCast({
-        text: `Check out @${user.username}'s profile on WhoIsWho!\n\nVerify reputation, check flags, and avoid spam accounts.\n\nIf you like it, please vote for it here: https://devfolio.co/projects/farcaster-user-stats-miniapp-fc7c `,
+        text: `Check out @${user.username}'s profile on WhoIsWho:\n\nVerify reputation, check flags, and avoid spam accounts. by @nikolaii.eth\n\nLike it? Please vote for it: https://devfolio.co/projects/farcaster-user-stats-miniapp-fc7c `,
         embeds: [profileUrl],
       });
       notification.success("Cast composer opened!");
