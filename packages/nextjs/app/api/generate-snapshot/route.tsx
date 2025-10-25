@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Errors, createClient } from "@farcaster/quick-auth";
+import sharp from "sharp";
 import { generateProfileImage } from "~~/utils/generateProfileImage";
 
 export const dynamic = "force-dynamic";
@@ -50,7 +51,7 @@ function checkRateLimit(fid: number): boolean {
 
 async function uploadToPinata(imageBuffer: Buffer, filename: string): Promise<string> {
   const formData = new FormData();
-  const blob = new Blob([new Uint8Array(imageBuffer)], { type: "image/png" });
+  const blob = new Blob([new Uint8Array(imageBuffer)], { type: "image/jpeg" });
   formData.append("file", blob, filename);
 
   const pinataJWT = process.env.PINATA_JWT;
@@ -150,12 +151,20 @@ export async function POST(request: NextRequest) {
 
     // Step 5: Generate profile image using shared utility
     const imageResponse = await generateProfileImage({ user });
-    const imageArrayBuffer = await imageResponse.arrayBuffer();
-    const imageBuffer = Buffer.from(imageArrayBuffer);
+    const pngBuffer = Buffer.from(await imageResponse.arrayBuffer());
+
+    // Convert PNG to JPEG with sharp for smaller file size
+    const jpegBuffer = await sharp(pngBuffer)
+      .jpeg({
+        quality: 85, // Good balance between quality and file size
+        progressive: true, // Progressive JPEG for better loading experience
+        mozjpeg: true, // Use mozjpeg for better compression
+      })
+      .toBuffer();
 
     // Step 6: Upload image to Pinata
-    const filename = `whoiswho-${fid}-${Date.now()}.png`;
-    const imageHash = await uploadToPinata(imageBuffer, filename);
+    const filename = `whoiswho-${fid}-${Date.now()}.jpg`;
+    const imageHash = await uploadToPinata(jpegBuffer, filename);
 
     // Step 7: Create and upload metadata
     const currentDate = new Date().toISOString().split("T")[0];

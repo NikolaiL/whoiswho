@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 import { readFile } from "fs/promises";
 import { join } from "path";
+import sharp from "sharp";
 import { generateProfileImage } from "~~/utils/generateProfileImage";
 
 export const runtime = "nodejs";
@@ -9,7 +10,7 @@ export const size = {
   width: 1200,
   height: 800,
 };
-export const contentType = "image/png";
+export const contentType = "image/jpeg";
 export const revalidate = 600; // Revalidate every 10 minutes
 
 async function fetchUserData(fid: string) {
@@ -80,12 +81,19 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
   // Use the shared utility function to generate the profile image
   const imageResponse = await generateProfileImage({ user, size });
 
-  // Convert ImageResponse to Response with custom cache headers
-  const imageBuffer = await imageResponse.arrayBuffer();
+  // Convert ImageResponse (PNG) to JPEG with sharp for smaller file size
+  const pngBuffer = Buffer.from(await imageResponse.arrayBuffer());
+  const jpegBuffer = await sharp(pngBuffer)
+    .jpeg({
+      quality: 85, // Good balance between quality and file size
+      progressive: true, // Progressive JPEG for better loading experience
+      mozjpeg: true, // Use mozjpeg for better compression
+    })
+    .toBuffer();
 
-  return new Response(imageBuffer, {
+  return new Response(new Uint8Array(jpegBuffer), {
     headers: {
-      "Content-Type": "image/png",
+      "Content-Type": "image/jpeg",
       "Cache-Control": "public, s-maxage=600, stale-while-revalidate=3600",
     },
   });
