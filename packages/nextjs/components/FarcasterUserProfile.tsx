@@ -454,7 +454,7 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
                 ) : (
                   <>
                     <ArrowUpIcon className="w-5 h-5" />
-                    Mint as NFT {mintPrice && mintPrice > 0n ? `(${formatEther(mintPrice)} ETH)` : "(Free)"}
+                    Mint as NFT {mintPrice && mintPrice > 0n ? `(${formatEther(mintPrice)} ETH)` : "(🔑Free Today)"}
                   </>
                 )}
               </button>
