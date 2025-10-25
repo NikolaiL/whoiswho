@@ -24,16 +24,14 @@ async function loadGoogleFont(font: string) {
 }
 
 async function fetchUserData(fid: string) {
-  const apiKey = process.env.NEYNAR_API_KEY;
-  if (!apiKey) {
-    throw new Error("NEYNAR_API_KEY not configured");
-  }
+  // Use our own API endpoint which fetches from both Neynar and Farcaster
+  const baseUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
 
-  const neynarUrl = `https://api.neynar.com/v2/farcaster/user/bulk?fids=${fid}`;
-  const response = await fetch(neynarUrl, {
+  const apiUrl = `${baseUrl}/api/user?fid=${fid}`;
+  console.log("apiUrl", apiUrl);
+  const response = await fetch(apiUrl, {
     method: "GET",
     headers: {
-      "x-api-key": apiKey,
       "Content-Type": "application/json",
     },
     next: { revalidate: 300 },
@@ -44,7 +42,7 @@ async function fetchUserData(fid: string) {
   }
 
   const data = await response.json();
-  return data.users?.[0] || null;
+  return data.user || null;
 }
 
 export default async function Image({ params }: { params: Promise<{ fid: string }> }) {
@@ -79,6 +77,13 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
   const avatarUrl = user.pfp_url || "https://farcaster.xyz/avatar.png";
   const neynarScore = user.score || 0;
 
+  // Get follower/following counts from Farcaster data (preferred) or fallback to Neynar
+  const followerCount = user.farcaster?.user?.followerCount || user.follower_count || 0;
+  const followingCount = user.farcaster?.user?.followingCount || user.following_count || 0;
+
+  // Get banner image if available
+  const bannerUrl = user.farcaster?.user?.profile?.bannerImageUrl;
+
   // Define colors
   const colors = {
     primary: "#8b5cf6",
@@ -103,8 +108,26 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
           alignItems: "center",
           justifyContent: "center",
           fontFamily: "Inter, sans-serif",
+          position: "relative",
+          overflow: "hidden",
         }}
       >
+        {/* Background banner image with blur */}
+        {bannerUrl && (
+          <img
+            src={bannerUrl}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "1200px",
+              height: "800px",
+              objectFit: "cover",
+              filter: "blur(5px)",
+              opacity: 0.7,
+            }}
+          />
+        )}
         <div
           style={{
             width: "1100px",
@@ -112,6 +135,7 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
             background: colors.background,
             borderRadius: "20px",
             border: `3px solid ${colors.base300}`,
+            boxShadow: "0 20px 50px rgba(0, 0, 0, 0.5)",
             display: "flex",
             flexDirection: "column",
             alignItems: "flex-start",
@@ -284,7 +308,7 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
                       display: "flex",
                     }}
                   >
-                    {user.follower_count.toLocaleString()}
+                    {followerCount.toLocaleString()}
                   </div>
                   <div
                     style={{
@@ -316,7 +340,7 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
                       display: "flex",
                     }}
                   >
-                    {user.following_count.toLocaleString()}
+                    {followingCount.toLocaleString()}
                   </div>
                   <div
                     style={{
