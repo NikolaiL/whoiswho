@@ -30,6 +30,7 @@ export async function generateMetadata({ params }: { params: Promise<{ fid: stri
             title: `${user.display_name} (@${user.username}) - Farcaster Profile`,
             description: `Check ${user.display_name}'s reputation score, verified wallets, and activity on Farcaster. Quality score: ${user.score?.toFixed(2) || "N/A"} | ${user.follower_count} followers`,
             imageRelativePath: `/profile/${fid}/opengraph-image`,
+            actionName: `WhoIsWho?✓`,
           });
         }
       }

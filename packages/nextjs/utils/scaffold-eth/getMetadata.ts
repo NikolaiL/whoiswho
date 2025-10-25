@@ -1,17 +1,23 @@
 import type { Metadata } from "next";
 
-function buildMiniappEmbed(imageUrl: string, imageRelativePath: string, title: string, baseUrl: string): string {
+function buildMiniappEmbed(
+  imageUrl: string,
+  imageRelativePath: string,
+  title: string,
+  baseUrl: string,
+  actionName?: string,
+): string {
   const miniappBaseUrl = getMiniappBaseUrl(baseUrl);
   const miniappImageUrl = getMiniappImageUrl(baseUrl, imageRelativePath);
   return JSON.stringify({
     version: "1",
     imageUrl: miniappImageUrl || imageUrl || process.env.NEXT_PUBLIC_IMAGE_URL,
     button: {
-      title: process.env.NEXT_PUBLIC_APP_NAME || title,
+      title: actionName || title || process.env.NEXT_PUBLIC_APP_NAME,
       action: {
         url: miniappBaseUrl,
         type: "launch_miniapp",
-        name: title || process.env.NEXT_PUBLIC_APP_NAME,
+        name: actionName || title || process.env.NEXT_PUBLIC_APP_NAME,
         splashImageUrl: process.env.NEXT_PUBLIC_APP_SPLASH_IMAGE || new URL("/favicon.png", miniappBaseUrl).toString(),
         splashBackgroundColor: process.env.NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR || "#212638",
       },
@@ -36,10 +42,12 @@ export const getMetadata = ({
   title,
   description,
   imageRelativePath = "/thumbnail.jpg",
+  actionName,
 }: {
   title: string;
   description: string;
   imageRelativePath?: string;
+  actionName?: string;
 }): Metadata => {
   const imageUrl = `${baseUrl}${imageRelativePath}`;
 
@@ -80,7 +88,7 @@ export const getMetadata = ({
       ],
     },
     other: {
-      "fc:miniapp": buildMiniappEmbed(imageUrl, imageRelativePath, title, baseUrl),
+      "fc:miniapp": buildMiniappEmbed(imageUrl, imageRelativePath, title, baseUrl, actionName),
     },
   };
 };
