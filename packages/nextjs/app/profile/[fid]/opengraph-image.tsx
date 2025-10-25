@@ -135,6 +135,23 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
   const followerRatio = followingCount === 0 ? 0 : followerCount / followingCount;
   const ratioLevel = followerRatio >= 0.8 ? "green" : followerRatio >= 0.2 ? "yellow" : "red";
 
+  // Determine stamp color based on worst flag
+  let stampLevel: "green" | "yellow" | "red" = "green";
+  if (neynarLevel === "red" || spamLevel === "red" || ratioLevel === "red") {
+    stampLevel = "red";
+  } else if (neynarLevel === "yellow" || spamLevel === "yellow" || ratioLevel === "yellow") {
+    stampLevel = "yellow";
+  }
+
+  // Get current date for stamp
+  const currentDate = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+  const [year, month, day] = currentDate.split("-");
+  const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+  const formattedDate = `${year}-${monthNames[parseInt(month) - 1]}-${day}`;
+
+  // Generate random rotation between -20 and +20 degrees
+  const stampRotation = Math.floor(Math.random() * 41) - 20; // Random between -20 and +20
+
   // Define colors
   const colors = {
     primary: "#8b5cf6",
@@ -516,7 +533,6 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
             style={{
               position: "absolute",
               bottom: "30px",
-              left: "50px",
               right: "50px",
               fontSize: "20px",
               color: colors.neutral,
@@ -525,6 +541,55 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
             }}
           >
             Verify Users • Check Reputation • Avoid Spam
+          </div>
+
+          {/* Verification Stamp */}
+          <div
+            style={{
+              position: "absolute",
+              bottom: "60px",
+              left: "20px",
+              transform: `rotate(${stampRotation}deg)`,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "10px 15px",
+              border: `8px dashed ${stampLevel === "green" ? colors.success : stampLevel === "yellow" ? colors.warning : colors.error}`,
+              borderRadius: "15px",
+              backgroundColor: "rgba(15, 23, 42, 0.1)",
+            }}
+          >
+            <div
+              style={{
+                fontFamily: "SpecialElite, monospace",
+                fontSize: "16px",
+                fontWeight: "700",
+                color:
+                  stampLevel === "green" ? colors.success : stampLevel === "yellow" ? colors.warning : colors.error,
+                textAlign: "center",
+                letterSpacing: "2px",
+                textTransform: "uppercase",
+                display: "flex",
+              }}
+            >
+              Verified by WhoIsWho
+            </div>
+            <div
+              style={{
+                fontFamily: "SpecialElite, monospace",
+                fontSize: "32px",
+                fontWeight: "700",
+                color:
+                  stampLevel === "green" ? colors.success : stampLevel === "yellow" ? colors.warning : colors.error,
+                marginTop: "8px",
+                textAlign: "center",
+                letterSpacing: "1px",
+                display: "flex",
+              }}
+            >
+              {formattedDate}
+            </div>
           </div>
         </div>
       </div>
@@ -543,6 +608,12 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
           data: await loadGoogleFont("Inter:wght@700"),
           style: "normal",
           weight: 700,
+        },
+        {
+          name: "SpecialElite",
+          data: await loadGoogleFont("Special+Elite:wght@400"),
+          style: "normal",
+          weight: 400,
         },
       ],
     },
