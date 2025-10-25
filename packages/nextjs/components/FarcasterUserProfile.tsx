@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { ClankerTokens } from "./ClankerTokens";
 import { FlagIndicator } from "./FlagIndicator";
@@ -8,7 +8,11 @@ import { useMiniapp } from "./MiniappProvider";
 import { DeBankIcon, ProBadgeIcon, ZapperIcon } from "./icons";
 import { Alert, Avatar, Badge, Card, CardBody, InfoTooltip } from "./ui";
 import { LoadingScreen } from "./ui/Loading";
+import { sdk } from "@farcaster/miniapp-sdk";
+import { formatEther } from "viem";
+import { useAccount } from "wagmi";
 import { ArrowUpIcon, CheckIcon, ClipboardDocumentIcon, ShareIcon } from "@heroicons/react/24/outline";
+import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import { useFarcasterUser } from "~~/hooks/useFarcasterUser";
 import { calculateFollowerRatio, getNeynarScoreLevel, parseSpamLabel } from "~~/utils/profileMetrics";
 import { notification } from "~~/utils/scaffold-eth";
@@ -27,9 +31,39 @@ const FALLBACK_AVATAR = "https://farcaster.xyz/avatar.png";
  */
 export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
   const { user, isLoading, error } = useFarcasterUser({ fid });
-  const { openLink, openProfile, composeCast, isReady: isMiniappReady } = useMiniapp();
+  const { openLink, openProfile, composeCast, isReady: isMiniappReady, user: miniappUser } = useMiniapp();
+  const { address } = useAccount();
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
   const [isSharing, setIsSharing] = useState(false);
+  const [isMinting, setIsMinting] = useState(false);
+  const [mintStep, setMintStep] = useState<"idle" | "verifying" | "generating" | "uploading" | "minting" | "success">(
+    "idle",
+  );
+  const [userMintCount, setUserMintCount] = useState<number>(0);
+
+  // Read contract to get user's minted tokens
+  const { data: userTokens } = useScaffoldReadContract({
+    contractName: "WhoIsWho",
+    functionName: "getUserTokens",
+    args: [address],
+  });
+
+  // Read mint price
+  const { data: mintPrice } = useScaffoldReadContract({
+    contractName: "WhoIsWho",
+    functionName: "mintPrice",
+  });
+
+  // Write contract hook
+  const { writeContractAsync: mintNFT } = useScaffoldWriteContract({
+    contractName: "WhoIsWho",
+  });
+
+  useEffect(() => {
+    if (userTokens) {
+      setUserMintCount(userTokens.length);
+    }
+  }, [userTokens]);
 
   const copyToClipboard = async (address: string) => {
     try {
@@ -64,6 +98,65 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
       notification.error("Failed to open cast composer");
     } finally {
       setIsSharing(false);
+    }
+  };
+
+  const handleMint = async () => {
+    try {
+      setIsMinting(true);
+
+      // Step 1: Check ownership
+      setMintStep("verifying");
+      if (!miniappUser?.fid) {
+        throw new Error("Please open in Farcaster app");
+      }
+      if (miniappUser.fid !== fid) {
+        throw new Error("You can only mint your own profile");
+      }
+      if (!address) {
+        throw new Error("Please connect your wallet");
+      }
+
+      // Step 2: Get Quick Auth token
+      const { token } = await sdk.quickAuth.getToken();
+
+      // Step 3: Generate snapshot and upload to IPFS
+      setMintStep("generating");
+      const response = await fetch("/api/generate-snapshot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fid, token }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to generate snapshot");
+      }
+
+      const { metadataHash } = await response.json();
+
+      // Step 4: Mint NFT on-chain
+      setMintStep("minting");
+      await mintNFT({
+        functionName: "mint",
+        args: [BigInt(fid), `ipfs://${metadataHash}`],
+        value: mintPrice || 0n,
+      });
+
+      setMintStep("success");
+      notification.success("NFT minted successfully!");
+
+      // Refresh user tokens
+      setTimeout(() => {
+        setMintStep("idle");
+        setIsMinting(false);
+      }, 3000);
+    } catch (error) {
+      console.error("Mint error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to mint NFT";
+      notification.error(errorMessage);
+      setMintStep("idle");
+      setIsMinting(false);
     }
   };
 
@@ -335,11 +428,54 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
               />
             </div>
 
-            {/* Share Button */}
-            <button onClick={handleShare} disabled={isSharing} className="btn btn-primary w-full gap-2">
-              <ShareIcon className="w-5 h-5" />
-              {isSharing ? "Opening Composer..." : "Share on Farcaster"}
-            </button>
+            {/* Buttons Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Share Button */}
+              <button onClick={handleShare} disabled={isSharing} className="btn btn-primary w-full gap-2">
+                <ShareIcon className="w-5 h-5" />
+                {isSharing ? "Opening Composer..." : "Share on Farcaster"}
+              </button>
+
+              {/* Mint Button */}
+              <button
+                onClick={handleMint}
+                disabled={isMinting || !isMiniappReady || !address || miniappUser?.fid !== fid}
+                className="btn btn-secondary w-full gap-2"
+              >
+                {isMinting ? (
+                  <>
+                    <span className="loading loading-spinner loading-sm"></span>
+                    {mintStep === "verifying" && "Verifying..."}
+                    {mintStep === "generating" && "Generating..."}
+                    {mintStep === "uploading" && "Uploading..."}
+                    {mintStep === "minting" && "Minting..."}
+                    {mintStep === "success" && "✓ Minted!"}
+                  </>
+                ) : (
+                  <>
+                    <ArrowUpIcon className="w-5 h-5" />
+                    Mint as NFT {mintPrice && mintPrice > 0n ? `(${formatEther(mintPrice)} ETH)` : "(Free)"}
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Show mint count if user has minted before */}
+            {userMintCount > 0 && (
+              <div className="text-sm text-center text-base-content/60">
+                You&apos;ve minted {userMintCount} snapshot{userMintCount !== 1 ? "s" : ""} of this profile
+              </div>
+            )}
+
+            {/* Show message if viewing someone else's profile */}
+            {miniappUser?.fid && miniappUser.fid !== fid && (
+              <div className="text-sm text-center text-warning">You can only mint your own profile</div>
+            )}
+
+            {/* Show message if wallet not connected */}
+            {!address && miniappUser?.fid === fid && (
+              <div className="text-sm text-center text-info">Connect your wallet to mint NFT</div>
+            )}
           </div>
         </CardBody>
       </Card>
