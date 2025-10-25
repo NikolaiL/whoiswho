@@ -6,7 +6,7 @@ export const size = {
   width: 1200,
   height: 800,
 };
-export const contentType = "image/jpeg";
+export const contentType = "image/png";
 
 async function loadGoogleFont(font: string) {
   const url = `https://fonts.googleapis.com/css2?family=${font}`;
