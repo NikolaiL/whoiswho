@@ -18,7 +18,6 @@ async function fetchUserData(fid: string) {
   const baseUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
 
   const apiUrl = `${baseUrl}/api/user?fid=${fid}`;
-  console.log("apiUrl", apiUrl);
   const response = await fetch(apiUrl, {
     method: "GET",
     headers: {
@@ -37,6 +36,7 @@ async function fetchUserData(fid: string) {
 
 export default async function Image({ params }: { params: Promise<{ fid: string }> }) {
   const { fid } = await params;
+  console.log(new Date().toISOString(), "Generating OG for fid:", fid);
   const user = await fetchUserData(fid);
 
   if (!user) {
