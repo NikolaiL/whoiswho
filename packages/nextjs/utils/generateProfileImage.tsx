@@ -169,7 +169,7 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
           {/* App Title */}
           <div
             style={{
-              fontSize: "48px",
+              fontSize: "54px",
               fontWeight: "700",
               color: "#ffffff",
               position: "absolute",
