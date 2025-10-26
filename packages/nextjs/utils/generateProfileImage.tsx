@@ -79,6 +79,16 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
   const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
   const formattedDate = `${year}-${monthNames[parseInt(month) - 1]}-${day}`;
 
+  function addZero(i: number) {
+    if (i < 10) {
+      return "0" + i;
+    }
+    return i;
+  }
+  // need time in utc timezone
+  const formattedTime =
+    `${addZero(new Date().getUTCHours())}:${addZero(new Date().getUTCMinutes())}:${addZero(new Date().getUTCSeconds())} UTC`.trim();
+
   // Generate random rotation between -20 and +20 degrees
   const stampRotation = Math.floor(Math.random() * 41) - 20; // Random between -20 and +20
 
@@ -519,6 +529,21 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
               }}
             >
               {formattedDate}
+            </div>
+            <div
+              style={{
+                fontFamily: "SpecialElite, monospace",
+                fontSize: "14px",
+                fontWeight: "700",
+                letterSpacing: "5px",
+                color:
+                  stampLevel === "green" ? colors.success : stampLevel === "yellow" ? colors.warning : colors.error,
+                marginTop: "2px",
+                textAlign: "center",
+                display: "flex",
+              }}
+            >
+              {formattedTime}
             </div>
           </div>
         </div>
