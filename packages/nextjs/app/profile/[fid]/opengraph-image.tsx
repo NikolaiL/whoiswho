@@ -23,7 +23,7 @@ async function fetchUserData(fid: string) {
     headers: {
       "Content-Type": "application/json",
     },
-    next: { revalidate: revalidate }, // 10 minutes to match image revalidation
+    next: { revalidate }, // 10 minutes to match image revalidation
   });
 
   if (!response.ok) {
