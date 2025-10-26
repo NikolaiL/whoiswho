@@ -13,6 +13,17 @@ export const size = {
 export const contentType = "image/jpeg";
 export const revalidate = 600; // Revalidate every 10 minutes
 
+// In-memory cache for generated images
+interface CacheEntry {
+  buffer: ArrayBuffer;
+  headers: Headers;
+  timestamp: number;
+}
+
+const imageCache = new Map<string, CacheEntry>();
+const pendingGenerations = new Map<string, Promise<Response>>();
+const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes in milliseconds
+
 async function fetchUserData(fid: string) {
   // Use our own API endpoint which fetches from both Neynar and Farcaster
   const baseUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
@@ -34,9 +45,7 @@ async function fetchUserData(fid: string) {
   return data.user || null;
 }
 
-export default async function Image({ params }: { params: Promise<{ fid: string }> }) {
-  const { fid } = await params;
-  console.log(new Date().toISOString(), "Generating OG for fid:", fid);
+async function generateImage(fid: string): Promise<Response> {
   const user = await fetchUserData(fid);
 
   if (!user) {
@@ -97,4 +106,77 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
       "Cache-Control": "public, s-maxage=600, stale-while-revalidate=3600",
     },
   });
+}
+
+export default async function Image({ params }: { params: Promise<{ fid: string }> }) {
+  const { fid } = await params;
+  const now = Date.now();
+
+  // Check if we have a valid cached entry
+  const cachedEntry = imageCache.get(fid);
+  if (cachedEntry && now - cachedEntry.timestamp < CACHE_DURATION) {
+    console.log(new Date().toISOString(), "✅ Cache HIT for fid:", fid);
+    // Return a new Response from the cached buffer
+    return new Response(cachedEntry.buffer, {
+      headers: cachedEntry.headers,
+    });
+  }
+
+  // Check if this image is already being generated
+  if (pendingGenerations.has(fid)) {
+    console.log(new Date().toISOString(), "⏳ Waiting for pending generation for fid:", fid);
+    return pendingGenerations.get(fid)!;
+  }
+
+  console.log(new Date().toISOString(), "🔄 Cache MISS - Generating OG for fid:", fid);
+
+  // Create the generation promise
+  const generationPromise = (async () => {
+    try {
+      const response = await generateImage(fid);
+
+      // Read the response body as buffer
+      const buffer = await response.arrayBuffer();
+
+      // Store buffer and headers in cache
+      imageCache.set(fid, {
+        buffer,
+        headers: response.headers,
+        timestamp: now,
+      });
+
+      console.log(
+        new Date().toISOString(),
+        "💾 Cached response for fid:",
+        fid,
+        "- Size:",
+        (buffer.byteLength / 1024).toFixed(1),
+        "KB",
+      );
+
+      // Clean up old cache entries (keep cache size manageable)
+      if (imageCache.size > 100) {
+        const entries = Array.from(imageCache.entries());
+        entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
+        // Remove oldest 20 entries
+        for (let i = 0; i < 20; i++) {
+          imageCache.delete(entries[i][0]);
+        }
+        console.log(new Date().toISOString(), "🧹 Cleaned up old cache entries, current size:", imageCache.size);
+      }
+
+      // Return a new Response with the buffer
+      return new Response(buffer, {
+        headers: response.headers,
+      });
+    } finally {
+      // Remove from pending after generation completes
+      pendingGenerations.delete(fid);
+    }
+  })();
+
+  // Store the promise to prevent duplicate generations
+  pendingGenerations.set(fid, generationPromise);
+
+  return generationPromise;
 }
