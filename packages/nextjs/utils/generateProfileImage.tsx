@@ -163,7 +163,7 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
               transform: "translateY(-50%)",
               width: "500px",
               height: "500px",
-              opacity: 0.1,
+              opacity: 0.05,
             }}
           />
           {/* App Title */}
