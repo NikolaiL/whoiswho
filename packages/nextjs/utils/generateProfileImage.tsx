@@ -150,23 +150,38 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
             justifyContent: "flex-start",
             padding: "50px",
             position: "relative",
+            overflow: "hidden",
           }}
         >
+          {/* Decorative Icon - Cropped on right edge */}
+          <img
+            src={`${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/icon.svg`}
+            style={{
+              position: "absolute",
+              right: "-145px",
+              top: "58%",
+              transform: "translateY(-50%)",
+              width: "500px",
+              height: "500px",
+              opacity: 0.1,
+            }}
+          />
           {/* App Title */}
           <div
             style={{
-              fontSize: "32px",
+              fontSize: "48px",
               fontWeight: "700",
-              color: colors.primary,
+              color: "#ffffff",
               position: "absolute",
-              top: "30px",
-              left: "50px",
+              top: "35px",
+              left: "54px",
               display: "flex",
               alignItems: "center",
               gap: "10px",
+              opacity: 0.15,
             }}
           >
-            🔍 WhoIsWho
+            WhoIsWho
           </div>
 
           {/* Content Container */}
