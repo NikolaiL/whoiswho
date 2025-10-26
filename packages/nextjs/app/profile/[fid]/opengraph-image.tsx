@@ -155,7 +155,7 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
       );
 
       // Clean up old cache entries (keep cache size manageable)
-      if (imageCache.size > 200) {
+      if (imageCache.size > 500) {
         const entries = Array.from(imageCache.entries());
         entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
         // Remove oldest 20 entries
