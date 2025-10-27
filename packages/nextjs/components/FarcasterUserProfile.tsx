@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ClankerTokens } from "./ClankerTokens";
 import { FlagIndicator } from "./FlagIndicator";
 import { useMiniapp } from "./MiniappProvider";
+import { StremeTokens } from "./StremeTokens";
 import { DeBankIcon, ProBadgeIcon, ZapperIcon } from "./icons";
 import { Alert, Avatar, Badge, Card, CardBody, InfoTooltip } from "./ui";
 import { LoadingScreen } from "./ui/Loading";
@@ -548,6 +549,9 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
 
       {/* SECTION 4: CLANKER TOKENS */}
       <ClankerTokens fid={user.fid} />
+
+      {/* SECTION 5: STREME TOKENS */}
+      <StremeTokens fid={user.fid} />
     </>
   );
 }
