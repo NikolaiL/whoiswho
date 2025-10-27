@@ -63,8 +63,9 @@ function generateGradientFromFid(fid: string | number): string {
   const hash = fidStr.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
   const hue1 = hash % 360;
   const hue2 = (hash * 137) % 360; // Golden angle for pleasing color combinations
+  const degree = (hash * 73) % 360; // Generate degree from 0-360
 
-  return `linear-gradient(135deg, hsl(${hue1}, 70%, 50%), hsl(${hue2}, 70%, 30%))`;
+  return `linear-gradient(${degree}deg, hsl(${hue1}, 70%, 50%), hsl(${hue2}, 70%, 30%))`;
 }
 
 async function getBannerImage(user: any): Promise<{ type: "image" | "gradient"; value: string }> {
