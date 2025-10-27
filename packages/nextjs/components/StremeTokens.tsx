@@ -104,56 +104,56 @@ export function StremeTokens({ fid }: StremeTokensProps) {
               </tr>
             </thead>
             <tbody>
-              {tokens.slice(0, 10).map(token => {
-                const marketCap = token.marketData?.marketCap || 0;
-                const priceChange = token.marketData?.priceChange24h || 0;
-                const { text: changeText, className: changeClass } = formatPriceChange(priceChange);
-                const { text: mcapText, isZero: mcapIsZero } = formatMarketCap(marketCap);
+              {tokens
+                .sort((a, b) => {
+                  const aMarketCap = a.marketData?.marketCap || 0;
+                  const bMarketCap = b.marketData?.marketCap || 0;
+                  return bMarketCap - aMarketCap; // Descending order
+                })
+                .map(token => {
+                  const marketCap = token.marketData?.marketCap || 0;
+                  const priceChange = token.marketData?.priceChange24h || 0;
+                  const { text: changeText, className: changeClass } = formatPriceChange(priceChange);
+                  const { text: mcapText, isZero: mcapIsZero } = formatMarketCap(marketCap);
 
-                return (
-                  <tr key={token.id} className="hover:bg-base-200/50">
-                    <td className="px-3 py-3">
-                      <div className="flex items-center gap-3">
-                        <button
-                          onClick={() => openLink(`https://streme.fun/token/${token.contract_address}`)}
-                          className="flex-shrink-0 cursor-pointer"
-                        >
-                          <Avatar src={token.img_url} alt={token.name} size="md" />
-                        </button>
-                        <div className="flex-1 min-w-0">
+                  return (
+                    <tr key={token.id} className="hover:bg-base-200/50">
+                      <td className="px-3 py-3">
+                        <div className="flex items-center gap-3">
                           <button
                             onClick={() => openLink(`https://streme.fun/token/${token.contract_address}`)}
-                            className="font-semibold truncate block hover:text-primary cursor-pointer text-left w-full"
+                            className="flex-shrink-0 cursor-pointer"
                           >
-                            {token.name}
+                            <Avatar src={token.img_url} alt={token.name} size="md" />
                           </button>
-                          <button
-                            onClick={() => openLink(`https://streme.fun/token/${token.contract_address}`)}
-                            className="text-sm text-primary hover:underline truncate block cursor-pointer"
-                          >
-                            {token.symbol}
-                          </button>
+                          <div className="flex-1 min-w-0">
+                            <button
+                              onClick={() => openLink(`https://streme.fun/token/${token.contract_address}`)}
+                              className="font-semibold truncate block hover:text-primary cursor-pointer text-left w-full"
+                            >
+                              {token.name}
+                            </button>
+                            <button
+                              onClick={() => openLink(`https://streme.fun/token/${token.contract_address}`)}
+                              className="text-sm text-primary hover:underline truncate block cursor-pointer"
+                            >
+                              {token.symbol}
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-3 py-3 text-right">
-                      <span className={`font-medium ${changeClass}`}>{changeText}</span>
-                    </td>
-                    <td className="px-3 py-3 text-right">
-                      <span className={`font-semibold ${mcapIsZero ? "text-base-content/40" : ""}`}>{mcapText}</span>
-                    </td>
-                  </tr>
-                );
-              })}
+                      </td>
+                      <td className="px-3 py-3 text-right">
+                        <span className={`font-medium ${changeClass}`}>{changeText}</span>
+                      </td>
+                      <td className="px-3 py-3 text-right">
+                        <span className={`font-semibold ${mcapIsZero ? "text-base-content/40" : ""}`}>{mcapText}</span>
+                      </td>
+                    </tr>
+                  );
+                })}
             </tbody>
           </table>
         </div>
-
-        {total > 10 && (
-          <div className="mt-4 text-center">
-            <span className="text-sm text-base-content/70">Showing top 10 of {total} tokens</span>
-          </div>
-        )}
       </CardBody>
     </Card>
   );
