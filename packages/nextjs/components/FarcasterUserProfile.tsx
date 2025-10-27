@@ -90,10 +90,15 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
     setIsSharing(true);
     try {
       const profileUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/profile/${user.fid}`;
+      let text = `Here is @${user.username}'s profile on WhoIsWho:\n\nVerify reputation, check flags, and avoid spam accounts - WhoIsWho by @nikolaii.eth\n\nLike it? Vote for it: https://devfolio.co/projects/farcaster-user-stats-miniapp-fc7c `;
+      if (fid == miniappUser?.fid) {
+        text = `Here is my profile on WhoIsWho:\n\nVerify reputation, check flags, and avoid spam accounts - WhoIsWho by @nikolaii.eth\n\nLike it? Vote for it: https://devfolio.co/projects/farcaster-user-stats-miniapp-fc7c `;
+      }
       await composeCast({
-        text: `Check out @${user.username}'s profile on WhoIsWho:\n\nVerify reputation, check flags, and avoid spam accounts. by @nikolaii.eth\n\nLike it? Please vote for it: https://devfolio.co/projects/farcaster-user-stats-miniapp-fc7c `,
+        text,
         embeds: [profileUrl],
       });
+      console.log("casted", text);
       notification.success("Cast composer opened!");
     } catch (err) {
       console.error("Failed to share:", err);
@@ -314,7 +319,7 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
           </p>
           <button
             onClick={() => openLink("https://devfolio.co/projects/farcaster-user-stats-miniapp-fc7c")}
-            className="btn btn-primary btn-sm shrink-0"
+            className="btn btn-primary btn-sm shrink-0 w-full sm:w-auto"
           >
             Vote Now
           </button>
