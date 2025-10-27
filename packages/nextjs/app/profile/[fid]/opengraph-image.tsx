@@ -57,7 +57,7 @@ async function generateImage(fid: string): Promise<Response> {
       return new Response(Buffer.from(thumbnailBuffer as unknown as ArrayBuffer), {
         headers: {
           "Content-Type": "image/jpeg",
-          "Cache-Control": "public, s-maxage=600, stale-while-revalidate=3600",
+          "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=14400",
         },
       });
     } catch (error) {
@@ -94,7 +94,7 @@ async function generateImage(fid: string): Promise<Response> {
   const pngBuffer = Buffer.from(await imageResponse.arrayBuffer());
   const jpegBuffer = await sharp(pngBuffer)
     .jpeg({
-      quality: 85, // Good balance between quality and file size
+      quality: 75, // Good balance between quality and file size
       progressive: true, // Progressive JPEG for better loading experience
       mozjpeg: true, // Use mozjpeg for better compression
     })
@@ -103,7 +103,7 @@ async function generateImage(fid: string): Promise<Response> {
   return new Response(new Uint8Array(jpegBuffer), {
     headers: {
       "Content-Type": "image/jpeg",
-      "Cache-Control": "public, s-maxage=600, stale-while-revalidate=3600, max-age=600",
+      "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400, max-age=600",
     },
   });
 }
