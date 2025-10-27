@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
         console.error("Error parsing Farcaster client API response:", err);
       }
     } else {
-      console.error("Farcaster client API error:", farcasterResponse.status);
+      console.error("Farcaster client API error:", farcasterResponse.status, farcasterUrl);
     }
 
     // Return the first user from the array (since we're querying by single FID)
