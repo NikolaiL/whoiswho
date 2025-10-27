@@ -88,6 +88,17 @@ async function getBannerImage(user: any): Promise<{ type: "image" | "gradient"; 
   return { type: "gradient", value: gradient };
 }
 
+export function transformImgurUrl(url: string): string {
+  // Check if the URL is from imgur.com
+  if (url.includes("imgur.com")) {
+    // Encode the URL
+    const encodedUrl = encodeURIComponent(url);
+    // Return the Warpcast CDN proxy URL
+    return `https://wrpcd.net/cdn-cgi/image/anim=false,fit=contain,f=auto,w=288/${encodedUrl}`;
+  }
+  return url;
+}
+
 interface GenerateProfileImageOptions {
   user: any;
   size?: { width: number; height: number };
@@ -96,7 +107,10 @@ interface GenerateProfileImageOptions {
 export async function generateProfileImage({ user, size = { width: 1200, height: 800 } }: GenerateProfileImageOptions) {
   const FALLBACK_AVATAR = "https://farcaster.xyz/avatar.png";
 
-  const avatarUrl = await validateImageUrl(user.pfp_url, FALLBACK_AVATAR);
+  let avatarUrl = await validateImageUrl(user.pfp_url, FALLBACK_AVATAR);
+
+  // Transform imgur URLs through Warpcast CDN proxy
+  avatarUrl = transformImgurUrl(avatarUrl);
 
   // Get banner image (fetched once, no re-fetch)
   const banner = await getBannerImage(user);

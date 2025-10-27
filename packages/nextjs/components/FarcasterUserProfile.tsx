@@ -15,6 +15,7 @@ import { useAccount } from "wagmi";
 import { ArrowUpIcon, CheckIcon, ClipboardDocumentIcon, ShareIcon } from "@heroicons/react/24/outline";
 import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import { useFarcasterUser } from "~~/hooks/useFarcasterUser";
+import { transformImgurUrl } from "~~/utils/generateProfileImage";
 import { calculateFollowerRatio, getNeynarScoreLevel, parseSpamLabel } from "~~/utils/profileMetrics";
 import { notification } from "~~/utils/scaffold-eth";
 
@@ -220,7 +221,7 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
         <CardBody>
           <div className="flex items-start gap-4">
             <div onClick={handleProfileClick} className="cursor-pointer">
-              <Avatar src={user.pfp_url || FALLBACK_AVATAR} alt={user.display_name} size="lg" />
+              <Avatar src={transformImgurUrl(user.pfp_url || FALLBACK_AVATAR)} alt={user.display_name} size="lg" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">

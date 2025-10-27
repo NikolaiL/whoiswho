@@ -5,6 +5,7 @@ import { ProBadgeIcon } from "./icons";
 import { Avatar } from "./ui";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import type { SearchUser } from "~~/types/farcaster-search";
+import { transformImgurUrl } from "~~/utils/generateProfileImage";
 
 interface FarcasterUserSearchProps {
   onSelectUser: (fid: number) => void;
@@ -134,7 +135,11 @@ export function FarcasterUserSearch({ onSelectUser }: FarcasterUserSearchProps) 
                     onClick={() => handleSelectUser(user)}
                     className="w-full flex items-center gap-3 px-4 py-3 hover:bg-base-200 transition-colors text-left cursor-pointer"
                   >
-                    <Avatar src={user.pfp?.url || FALLBACK_AVATAR} alt={user.displayName} size="md" />
+                    <Avatar
+                      src={transformImgurUrl(user.pfp?.url || FALLBACK_AVATAR)}
+                      alt={user.displayName}
+                      size="md"
+                    />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
                         <span className="font-semibold truncate">{user.displayName}</span>
