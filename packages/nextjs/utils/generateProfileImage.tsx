@@ -37,6 +37,56 @@ export async function validateImageUrl(url: string | undefined, fallbackUrl: str
   return fallbackUrl;
 }
 
+async function fetchImageAsDataUrl(url: string, timeoutMs: number = 3000): Promise<string | null> {
+  try {
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+
+    if (!response.ok || !response.headers.get("content-type")?.startsWith("image/")) {
+      return null;
+    }
+
+    const buffer = await response.arrayBuffer();
+    const base64 = Buffer.from(buffer).toString("base64");
+    const contentType = response.headers.get("content-type") || "image/jpeg";
+
+    return `data:${contentType};base64,${base64}`;
+  } catch {
+    // Silently fail - timeouts are expected when external services are unavailable
+    return null;
+  }
+}
+
+function generateGradientFromFid(fid: string | number): string {
+  const fidStr = String(fid);
+  const hash = fidStr.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const hue1 = hash % 360;
+  const hue2 = (hash * 137) % 360; // Golden angle for pleasing color combinations
+
+  return `linear-gradient(135deg, hsl(${hue1}, 70%, 50%), hsl(${hue2}, 70%, 30%))`;
+}
+
+async function getBannerImage(user: any): Promise<{ type: "image" | "gradient"; value: string }> {
+  // Try user banner first (3s timeout)
+  if (user.farcaster?.user?.profile?.bannerImageUrl) {
+    const dataUrl = await fetchImageAsDataUrl(user.farcaster.user.profile.bannerImageUrl, 3000);
+    if (dataUrl) {
+      return { type: "image", value: dataUrl };
+    }
+  }
+
+  // Try picsum with shorter timeout (2s)
+  const picsumUrl = await fetchImageAsDataUrl("https://picsum.photos/1200/800", 2000);
+  if (picsumUrl) {
+    return { type: "image", value: picsumUrl };
+  }
+
+  // Fallback to gradient
+  const gradient = generateGradientFromFid(user.fid || user.fid_str || "0");
+  return { type: "gradient", value: gradient };
+}
+
 interface GenerateProfileImageOptions {
   user: any;
   size?: { width: number; height: number };
@@ -44,10 +94,11 @@ interface GenerateProfileImageOptions {
 
 export async function generateProfileImage({ user, size = { width: 1200, height: 800 } }: GenerateProfileImageOptions) {
   const FALLBACK_AVATAR = "https://farcaster.xyz/avatar.png";
-  const FALLBACK_BANNER = "https://picsum.photos/1200/800";
 
   const avatarUrl = await validateImageUrl(user.pfp_url, FALLBACK_AVATAR);
-  const bannerUrl = await validateImageUrl(user.farcaster?.user?.profile?.bannerImageUrl, FALLBACK_BANNER);
+
+  // Get banner image (fetched once, no re-fetch)
+  const banner = await getBannerImage(user);
 
   const neynarScore = user.score || 0;
 
@@ -120,10 +171,10 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
           overflow: "hidden",
         }}
       >
-        {/* Background banner image with blur */}
-        {bannerUrl && (
+        {/* Background: Image or Gradient */}
+        {banner.type === "image" ? (
           <img
-            src={bannerUrl}
+            src={banner.value}
             style={{
               position: "absolute",
               top: 0,
@@ -131,6 +182,19 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
               width: "1200px",
               height: "800px",
               objectFit: "cover",
+              filter: "blur(5px)",
+              opacity: 0.7,
+            }}
+          />
+        ) : (
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "1200px",
+              height: "800px",
+              background: banner.value,
               filter: "blur(5px)",
               opacity: 0.7,
             }}
