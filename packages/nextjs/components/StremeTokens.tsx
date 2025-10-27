@@ -1,6 +1,7 @@
 "use client";
 
 import { useMiniapp } from "./MiniappProvider";
+import { StremeLaunchButton } from "./StremeLaunchButton";
 import { Avatar, Badge, Card, CardBody } from "./ui";
 import { LoadingScreen } from "./ui/Loading";
 import { RocketLaunchIcon } from "@heroicons/react/24/outline";
@@ -59,15 +60,10 @@ export function StremeTokens({ fid }: StremeTokensProps) {
           <div className="flex flex-col items-center justify-center py-8 text-center">
             <RocketLaunchIcon className="w-12 h-12 text-base-content/30 mb-4" />
             <h3 className="text-lg font-semibold mb-2">No Streme Tokens</h3>
-            <p className="text-base-content/70 mb-4 text-sm">
-              This user hasn&apos;t deployed any tokens on Streme yet.
+            <p className="text-base-content/70 mb-8 text-sm">
+              This user hasn&apos;t launched any tokens on Streme yet.
             </p>
-            <button
-              onClick={() => openLink("https://streme.fun/launch")}
-              className="btn btn-primary btn-sm cursor-pointer"
-            >
-              Launch Token
-            </button>
+            <StremeLaunchButton />
           </div>
         </CardBody>
       </Card>
@@ -84,14 +80,6 @@ export function StremeTokens({ fid }: StremeTokensProps) {
               {total}
             </Badge>
           </h3>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => openLink("https://streme.fun/launch")}
-              className="text-sm text-primary hover:underline cursor-pointer"
-            >
-              Launch
-            </button>
-          </div>
         </div>
 
         <div className="overflow-x-auto">
@@ -117,7 +105,7 @@ export function StremeTokens({ fid }: StremeTokensProps) {
                   const { text: mcapText, isZero: mcapIsZero } = formatMarketCap(marketCap);
 
                   return (
-                    <tr key={token.id} className="hover:bg-base-200/50">
+                    <tr key={`streme-token-${token.contract_address}`} className="hover:bg-base-200/50">
                       <td className="px-3 py-3">
                         <div className="flex items-center gap-3">
                           <button
@@ -153,6 +141,10 @@ export function StremeTokens({ fid }: StremeTokensProps) {
                 })}
             </tbody>
           </table>
+        </div>
+
+        <div className="mt-6 flex sm:justify-center">
+          <StremeLaunchButton />
         </div>
       </CardBody>
     </Card>

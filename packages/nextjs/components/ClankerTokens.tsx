@@ -1,5 +1,6 @@
 "use client";
 
+import { ClankerDeployButton } from "./ClankerDeployButton";
 import { useMiniapp } from "./MiniappProvider";
 import { Avatar, Badge, Card, CardBody } from "./ui";
 import { LoadingScreen } from "./ui/Loading";
@@ -59,15 +60,10 @@ export function ClankerTokens({ fid }: ClankerTokensProps) {
           <div className="flex flex-col items-center justify-center py-8 text-center">
             <RocketLaunchIcon className="w-12 h-12 text-base-content/30 mb-4" />
             <h3 className="text-lg font-semibold mb-2">No Clankers Deployed</h3>
-            <p className="text-base-content/70 mb-4 text-sm">
-              This user hasn&apos;t deployed any tokens on Clanker yet.
+            <p className="text-base-content/70 mb-8 text-sm">
+              This user hasn&apos;t created any tokens on Clanker yet.
             </p>
-            <button
-              onClick={() => openLink("https://clanker.world/deploy")}
-              className="btn btn-primary btn-sm cursor-pointer"
-            >
-              Deploy Now
-            </button>
+            <ClankerDeployButton />
           </div>
         </CardBody>
       </Card>
@@ -84,20 +80,12 @@ export function ClankerTokens({ fid }: ClankerTokensProps) {
               {total}
             </Badge>
           </h3>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => openLink("https://clanker.world/deploy")}
-              className="text-sm text-primary hover:underline cursor-pointer"
-            >
-              Deploy
-            </button>
-            <button
-              onClick={() => openLink("https://clanker.world/")}
-              className="text-sm text-primary hover:underline cursor-pointer"
-            >
-              View All
-            </button>
-          </div>
+          <button
+            onClick={() => openLink("https://clanker.world/")}
+            className="text-sm text-primary hover:underline cursor-pointer"
+          >
+            View All
+          </button>
         </div>
 
         <div className="overflow-x-auto">
@@ -117,7 +105,7 @@ export function ClankerTokens({ fid }: ClankerTokensProps) {
                 const { text: mcapText, isZero: mcapIsZero } = formatMarketCap(marketCap);
 
                 return (
-                  <tr key={token.id} className="hover:bg-base-200/50">
+                  <tr key={`clanker-token-${token.contract_address}`} className="hover:bg-base-200/50">
                     <td className="px-3 py-3">
                       <div className="flex items-center gap-3">
                         <button
@@ -156,15 +144,12 @@ export function ClankerTokens({ fid }: ClankerTokensProps) {
         </div>
 
         {total > 10 && (
-          <div className="mt-4 text-center">
-            <button
-              onClick={() => openLink("https://clanker.world/")}
-              className="text-sm text-base-content/70 hover:text-base-content"
-            >
-              Showing top 10 of {total} tokens
-            </button>
-          </div>
+          <div className="mt-4 text-center text-sm text-base-content/70">Showing top 10 of {total} tokens</div>
         )}
+
+        <div className="mt-6 flex sm:justify-center">
+          <ClankerDeployButton />
+        </div>
       </CardBody>
     </Card>
   );
