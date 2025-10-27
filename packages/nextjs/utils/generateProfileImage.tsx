@@ -91,10 +91,13 @@ async function getBannerImage(user: any): Promise<{ type: "image" | "gradient"; 
 export function transformImgurUrl(url: string): string {
   // Check if the URL is from imgur.com
   if (url.includes("imgur.com")) {
+    console.log("transforming imgur url", url);
     // Encode the URL
     const encodedUrl = encodeURIComponent(url);
     // Return the Warpcast CDN proxy URL
-    return `https://wrpcd.net/cdn-cgi/image/anim=false,fit=contain,f=auto,w=288/${encodedUrl}`;
+    const result = `https://wrpcd.net/cdn-cgi/image/anim=false,fit=contain,f=auto,w=288/${encodedUrl}`;
+    console.log("transformed imgur url", result);
+    return result;
   }
   return url;
 }
