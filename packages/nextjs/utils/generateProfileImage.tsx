@@ -90,7 +90,7 @@ async function getBannerImage(user: any): Promise<{ type: "image" | "gradient"; 
 
 export function transformImgurUrl(url: string): string {
   // Check if the URL is from imgur.com
-  if (url.includes("imgur.com")) {
+  if (url?.includes("imgur.com")) {
     //console.log("transforming imgur url", url);
     // Encode the URL
     const encodedUrl = encodeURIComponent(url);
@@ -243,11 +243,11 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
             src={`${process.env.NEXT_PUBLIC_URL || "http://localhost:3000"}/icon.svg`}
             style={{
               position: "absolute",
-              right: "-145px",
-              top: "58%",
+              right: "-147px",
+              top: "67%",
               transform: "translateY(-50%)",
-              width: "500px",
-              height: "500px",
+              width: "550px",
+              height: "550px",
               opacity: 0.05,
             }}
           />
@@ -267,6 +267,25 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
             }}
           >
             WhoIsWho
+          </div>
+
+          {/* FID */}
+          <div
+            style={{
+              fontSize: "48px",
+              fontWeight: "700",
+              color: "#ffffff",
+              position: "absolute",
+              top: "46px",
+              right: "50px",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              opacity: 0.15,
+              fontFamily: "Sixtyfour, monospace",
+            }}
+          >
+            {user.fid}
           </div>
 
           {/* Content Container */}
@@ -667,6 +686,12 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
         {
           name: "SpecialElite",
           data: await loadGoogleFont("Special+Elite:wght@400"),
+          style: "normal",
+          weight: 400,
+        },
+        {
+          name: "Sixtyfour",
+          data: await loadGoogleFont("Sixtyfour"),
           style: "normal",
           weight: 400,
         },
