@@ -215,6 +215,9 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
   const followingCount = user.farcaster?.user?.followingCount || 0;
   const ratioData = calculateFollowerRatio(followerCount, followingCount);
 
+  const totalFollowerCount = user.follower_count || 0;
+  const totalFollowingCount = user.following_count || 0;
+
   const handleProfileClick = () => {
     openProfile({ fid: user.fid, username: user.username });
   };
@@ -300,12 +303,50 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
           {/* Follower Stats */}
           <div className="flex gap-4 mt-4 pt-4 border-t border-base-300">
             <div className="flex-1 text-center">
-              <div className="text-xs text-base-content/60 mb-1">Followers</div>
-              <div className="text-xl font-bold">{followerCount.toLocaleString()}</div>
+              <div className="text-sm text-base-content/60">
+                Followers
+                <InfoTooltip title="Followers">
+                  Excluding bots and spammy accounts (Excluding accounts with Spam Score 0)
+                </InfoTooltip>
+              </div>
+              <div className="text-xl font-bold mb-1">{followerCount.toLocaleString()}</div>
+              {totalFollowerCount > followerCount && (
+                <>
+                  <div className="text-xs text-base-content/40 flex items-center gap-1 justify-center">
+                    Total Followers
+                    <InfoTooltip title="Total Followers">
+                      Including all followers, regardless of account quality or spam activity (Including accounts with
+                      Spam Score 0)
+                    </InfoTooltip>
+                  </div>
+                  <div className="text-base text-base-content/50 font-bold -mt-1">
+                    {totalFollowerCount.toLocaleString()}
+                  </div>
+                </>
+              )}
             </div>
             <div className="flex-1 text-center">
-              <div className="text-xs text-base-content/60 mb-1">Following</div>
-              <div className="text-xl font-bold">{followingCount.toLocaleString()}</div>
+              <div className="text-sm text-base-content/60">
+                Following
+                <InfoTooltip title="Following">
+                  Excluding bots and spammy accounts (Excluding accounts with Spam Score 0)
+                </InfoTooltip>
+              </div>
+              <div className="text-xl font-bold mb-1">{followingCount.toLocaleString()}</div>
+              {totalFollowingCount > followingCount && (
+                <>
+                  <div className="text-xs text-base-content/40">
+                    Total Following
+                    <InfoTooltip title="Total Following">
+                      Including all following, regardless of account quality or spam activity (Including accounts with
+                      Spam Score 0)
+                    </InfoTooltip>
+                  </div>
+                  <div className="text-base text-base-content/50 font-bold -mt-1">
+                    {totalFollowingCount.toLocaleString()}
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </CardBody>
