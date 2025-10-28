@@ -12,6 +12,7 @@ interface User {
 
 interface MiniappContextType {
   user: User | null;
+  context: any;
   isReady: boolean;
   isMiniApp: boolean;
   openLink: (url: string) => Promise<void>;
@@ -35,6 +36,7 @@ interface MiniappProviderProps {
 
 export const MiniappProvider = ({ children }: MiniappProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
+  const [context, setContext] = useState<any>(null);
   const [isReady, setIsReady] = useState(false);
   const [isMiniApp, setIsMiniApp] = useState(false);
 
@@ -116,19 +118,19 @@ export const MiniappProvider = ({ children }: MiniappProviderProps) => {
       .ready()
       .then(async () => {
         console.log("MiniApp SDK ready");
-        const context = await sdk.context;
+        const ctx = await sdk.context;
         const isMiniApp = await sdk.isInMiniApp();
-        const user = context?.user ?? null;
+        const user = ctx?.user ?? null;
         console.log("User", user);
         console.log("Is MiniApp", isMiniApp);
         // set the user to the context
         setUser(user as User);
+        setContext(ctx);
         setIsMiniApp(isMiniApp);
         setIsReady(true);
 
         //if NEXT_PUBLIC_APP_AUTOADD is true, check if user has added the miniapp, if not force it
         if (process.env.NEXT_PUBLIC_APP_AUTOADD === "true") {
-          const ctx = await sdk.context;
           const added = ctx?.client?.added ?? false;
           console.log("added:", added);
           if (!added && isMiniApp) {
@@ -146,12 +148,13 @@ export const MiniappProvider = ({ children }: MiniappProviderProps) => {
             user,
             isReady: true,
             isMiniApp,
+            context: ctx,
           };
 
           // Emit custom event for event-based access
           window.dispatchEvent(
             new CustomEvent("miniapp-data-update", {
-              detail: { user, isReady: true, isMiniApp },
+              detail: { user, isReady: true, isMiniApp, context: ctx },
             }),
           );
         }
@@ -164,6 +167,7 @@ export const MiniappProvider = ({ children }: MiniappProviderProps) => {
             user: null,
             isReady: false,
             isMiniApp: false,
+            context: null,
           };
         }
       });
@@ -171,6 +175,7 @@ export const MiniappProvider = ({ children }: MiniappProviderProps) => {
 
   const value = {
     user,
+    context: context as any,
     isReady,
     isMiniApp,
     openLink,

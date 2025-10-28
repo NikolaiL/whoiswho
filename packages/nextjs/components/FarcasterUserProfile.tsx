@@ -33,7 +33,14 @@ const FALLBACK_AVATAR = "https://farcaster.xyz/avatar.png";
  */
 export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
   const { user, isLoading, error } = useFarcasterUser({ fid });
-  const { openLink, openProfile, composeCast, isReady: isMiniappReady, user: miniappUser } = useMiniapp();
+  const {
+    openLink,
+    openProfile,
+    composeCast,
+    isReady: isMiniappReady,
+    user: miniappUser,
+    context: miniappContext,
+  } = useMiniapp();
   const { address } = useAccount();
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
   const [isSharing, setIsSharing] = useState(false);
@@ -217,6 +224,11 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
 
   const totalFollowerCount = user.follower_count || 0;
   const totalFollowingCount = user.following_count || 0;
+
+  let clientName = "Farcaster";
+  if (miniappContext?.client?.clientFid == 309857) {
+    clientName = "Base App";
+  }
 
   const handleProfileClick = () => {
     openProfile({ fid: user.fid, username: user.username });
@@ -481,7 +493,7 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
               {/* Share Button */}
               <button onClick={handleShare} disabled={isSharing} className="btn btn-primary w-full gap-2">
                 <ShareIcon className="w-5 h-5" />
-                {isSharing ? "Opening Composer..." : "Share on Farcaster"}
+                {isSharing ? "Opening Composer..." : `Share on ${clientName}`}
               </button>
 
               {/* Mint Button, should only show if fid is the same as the miniapp user fid */}
