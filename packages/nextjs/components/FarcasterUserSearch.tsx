@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ProBadgeIcon } from "./icons";
 import { Avatar } from "./ui";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import type { SearchUser } from "~~/types/farcaster-search";
 import { transformImgurUrl } from "~~/utils/generateProfileImage";
 
@@ -83,6 +83,13 @@ export function FarcasterUserSearch({ onSelectUser, currentFid, miniappUserFid }
     setResults([]);
   };
 
+  const handleClear = () => {
+    setQuery("");
+    setResults([]);
+    setIsOpen(false);
+    setError(null);
+  };
+
   const [hideShowMeButton, setHideShowMeButton] = useState(false);
 
   const handleShowMe = () => {
@@ -104,7 +111,7 @@ export function FarcasterUserSearch({ onSelectUser, currentFid, miniappUserFid }
           <MagnifyingGlassIcon className="w-5 h-5 text-base-content/50" />
         </div>
         <input
-          type="search"
+          type="text"
           name="q"
           value={query}
           onChange={e => setQuery(e.target.value)}
@@ -112,9 +119,17 @@ export function FarcasterUserSearch({ onSelectUser, currentFid, miniappUserFid }
           className="text-lg input input-bordered w-full pl-2 pr-2 rounded-2xl text-base"
           autoComplete="off"
         />
-
+        {query && (
+          <button
+            onClick={handleClear}
+            className="absolute inset-y-0 right-0 flex items-center pr-4 hover:text-error transition-colors"
+            aria-label="Clear search"
+          >
+            <XMarkIcon className="w-6 h-6" />
+          </button>
+        )}
         {isLoading && (
-          <div className="absolute inset-y-0 right-12 flex items-center pr-4">
+          <div className="absolute inset-y-0 right-8 flex items-center pr-2">
             <span className="loading loading-spinner loading-sm"></span>
           </div>
         )}
