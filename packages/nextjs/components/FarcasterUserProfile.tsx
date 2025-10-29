@@ -204,7 +204,9 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
 
   // If we have a FID but no user data, show error
   if (!user) {
-    return (
+    return isLoading ? (
+      <LoadingScreen message="Loading user profile..." />
+    ) : (
       <Alert variant="warning" title="User not found">
         No user found with FID {fid}
       </Alert>
