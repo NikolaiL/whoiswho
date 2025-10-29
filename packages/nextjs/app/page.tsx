@@ -57,7 +57,7 @@ function HomeContent() {
     <div className="flex items-center flex-col grow pt-4">
       <div className="px-5 w-full">
         {/* Search for Farcaster users */}
-        <FarcasterUserSearch onSelectUser={handleSelectFid} />
+        <FarcasterUserSearch onSelectUser={handleSelectFid} miniappUserFid={user?.fid} />
 
         {/* Welcome message when no user is selected */}
         {!fidFromUrl && (

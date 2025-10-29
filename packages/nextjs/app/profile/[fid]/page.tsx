@@ -31,6 +31,7 @@ export async function generateMetadata({ params }: { params: Promise<{ fid: stri
             description: `Check ${user.display_name}'s reputation score, verified wallets, and activity on Farcaster. Quality score: ${user.score?.toFixed(2) || "N/A"} | ${user.follower_count} followers`,
             imageRelativePath: `/profile/${fid}/opengraph-image`,
             actionName: `WhoIsWho?✓`,
+            actionRealtiveUrl: `/profile/${fid}`,
           });
         }
       }
@@ -44,6 +45,8 @@ export async function generateMetadata({ params }: { params: Promise<{ fid: stri
     title: `Farcaster User Profile - FID ${fid}`,
     description: `View reputation score, verified wallets, and Clanker tokens for Farcaster user ${fid}. Check if this account is trustworthy before engaging.`,
     imageRelativePath: `/profile/${fid}/opengraph-image`,
+    actionName: `WhoIsWho?✓`,
+    actionRealtiveUrl: `/profile/${fid}`,
   });
 }
 

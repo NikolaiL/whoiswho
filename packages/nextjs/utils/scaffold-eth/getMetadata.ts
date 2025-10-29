@@ -6,16 +6,18 @@ function buildMiniappEmbed(
   title: string,
   baseUrl: string,
   actionName?: string,
+  actionRealtiveUrl?: string,
 ): string {
   const miniappBaseUrl = getMiniappBaseUrl(baseUrl);
   const miniappImageUrl = getMiniappImageUrl(baseUrl, imageRelativePath);
+  const miniappActionUrl = getMiniappActionUrl(baseUrl, actionRealtiveUrl || "");
   return JSON.stringify({
     version: "1",
     imageUrl: miniappImageUrl || imageUrl || process.env.NEXT_PUBLIC_IMAGE_URL,
     button: {
       title: actionName || title || process.env.NEXT_PUBLIC_APP_NAME,
       action: {
-        url: miniappBaseUrl,
+        url: miniappActionUrl,
         type: "launch_miniapp",
         name: actionName || title || process.env.NEXT_PUBLIC_APP_NAME,
         splashImageUrl: process.env.NEXT_PUBLIC_APP_SPLASH_IMAGE || new URL("/favicon.png", miniappBaseUrl).toString(),
@@ -33,6 +35,10 @@ function getMiniappImageUrl(baseUrl: string, imageRelativePath: string): string 
   return new URL(imageRelativePath, getMiniappBaseUrl(baseUrl)).toString();
 }
 
+function getMiniappActionUrl(baseUrl: string, actionRealtiveUrl: string): string {
+  return new URL(actionRealtiveUrl, getMiniappBaseUrl(baseUrl)).toString();
+}
+
 const baseUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
   ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
   : `http://localhost:${process.env.PORT || 3000}`;
@@ -43,11 +49,13 @@ export const getMetadata = ({
   description,
   imageRelativePath = "/thumbnail.jpg",
   actionName,
+  actionRealtiveUrl,
 }: {
   title: string;
   description: string;
   imageRelativePath?: string;
   actionName?: string;
+  actionRealtiveUrl?: string;
 }): Metadata => {
   const imageUrl = `${baseUrl}${imageRelativePath}`;
 
@@ -88,7 +96,7 @@ export const getMetadata = ({
       ],
     },
     other: {
-      "fc:miniapp": buildMiniappEmbed(imageUrl, imageRelativePath, title, baseUrl, actionName),
+      "fc:miniapp": buildMiniappEmbed(imageUrl, imageRelativePath, title, baseUrl, actionName, actionRealtiveUrl),
     },
   };
 };

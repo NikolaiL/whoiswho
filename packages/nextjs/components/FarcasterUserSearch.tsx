@@ -3,12 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import { ProBadgeIcon } from "./icons";
 import { Avatar } from "./ui";
-import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import type { SearchUser } from "~~/types/farcaster-search";
 import { transformImgurUrl } from "~~/utils/generateProfileImage";
 
 interface FarcasterUserSearchProps {
   onSelectUser: (fid: number) => void;
+  currentFid?: number;
+  miniappUserFid?: number;
 }
 
 // Fallback avatar for users without pfp
@@ -18,7 +20,7 @@ const FALLBACK_AVATAR = "https://farcaster.xyz/avatar.png";
  * Search-as-you-type component for finding Farcaster users
  * Features debounced API calls, dropdown results, and user selection
  */
-export function FarcasterUserSearch({ onSelectUser }: FarcasterUserSearchProps) {
+export function FarcasterUserSearch({ onSelectUser, currentFid, miniappUserFid }: FarcasterUserSearchProps) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchUser[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -81,12 +83,18 @@ export function FarcasterUserSearch({ onSelectUser }: FarcasterUserSearchProps) 
     setResults([]);
   };
 
-  const handleClear = () => {
-    setQuery("");
-    setResults([]);
-    setIsOpen(false);
-    setError(null);
+  const [hideShowMeButton, setHideShowMeButton] = useState(false);
+
+  const handleShowMe = () => {
+    if (miniappUserFid) {
+      //shouldShowMeButton should be false now we should use some additional var for it
+      setHideShowMeButton(true);
+      onSelectUser(miniappUserFid);
+    }
   };
+
+  const shouldShowMeButton =
+    !hideShowMeButton && !query.trim() && miniappUserFid && currentFid && currentFid !== miniappUserFid;
 
   return (
     <div ref={searchRef} className="relative w-full max-w-2xl mx-auto mb-6">
@@ -101,22 +109,23 @@ export function FarcasterUserSearch({ onSelectUser }: FarcasterUserSearchProps) 
           value={query}
           onChange={e => setQuery(e.target.value)}
           placeholder="Search by name or FID..."
-          className="input input-bordered w-full pl-2 pr-2 rounded-2xl text-base"
+          className="text-lg input input-bordered w-full pl-2 pr-2 rounded-2xl text-base"
           autoComplete="off"
         />
-        {query && (
-          <button
-            onClick={handleClear}
-            className="absolute inset-y-0 right-0 flex items-center pr-4 hover:text-error transition-colors"
-            aria-label="Clear search"
-          >
-            <XMarkIcon className="w-5 h-5" />
-          </button>
-        )}
+
         {isLoading && (
           <div className="absolute inset-y-0 right-12 flex items-center pr-4">
             <span className="loading loading-spinner loading-sm"></span>
           </div>
+        )}
+        {shouldShowMeButton && (
+          <button
+            onClick={handleShowMe}
+            className="absolute inset-y-0 right-0 flex items-center btn btn-primary btn-sm py-0 !min-h-0 mr-1 mt-1"
+            aria-label="Show my profile"
+          >
+            Show Me
+          </button>
         )}
       </div>
 
