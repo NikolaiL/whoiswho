@@ -127,6 +127,10 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
   const followerCount = user.farcaster?.user?.followerCount || user.follower_count || 0;
   const followingCount = user.farcaster?.user?.followingCount || user.following_count || 0;
 
+  // Get creator rewards data
+  const creatorScore = user.creatorRewards?.score || 0;
+  const creatorRank = user.creatorRewards?.rank || 0;
+
   // Calculate flag levels
   const neynarLevel = neynarScore >= 0.7 ? "green" : neynarScore >= 0.55 ? "yellow" : "red";
 
@@ -380,18 +384,26 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
                 @{user.username}
               </div>
 
-              {/* Follower Stats */}
+              {/* Follower and Creator Score Stats */}
               <div
                 style={{
                   display: "flex",
-                  gap: "40px",
+                  gap: "15px",
+                  width: "100%",
                   marginTop: "0px",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
                 <div
                   style={{
                     display: "flex",
                     flexDirection: "column",
+                    border: `3px solid ${colors.base300}`,
+                    borderRadius: "10px",
+                    padding: "5px",
+                    flex: 1,
+                    alignItems: "center",
                   }}
                 >
                   <div
@@ -406,7 +418,7 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
                   </div>
                   <div
                     style={{
-                      fontSize: "20px",
+                      fontSize: "16px",
                       color: colors.neutral,
                       opacity: 0.6,
                       display: "flex",
@@ -419,6 +431,11 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
                   style={{
                     display: "flex",
                     flexDirection: "column",
+                    border: `3px solid ${colors.base300}`,
+                    borderRadius: "10px",
+                    padding: "5px",
+                    flex: 1,
+                    alignItems: "center",
                   }}
                 >
                   <div
@@ -433,13 +450,78 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
                   </div>
                   <div
                     style={{
-                      fontSize: "20px",
+                      fontSize: "16px",
                       color: colors.neutral,
                       opacity: 0.6,
                       display: "flex",
                     }}
                   >
                     Following
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    flex: 1,
+                    border: `3px solid ${colors.base300}`,
+                    borderRadius: "10px",
+                    padding: "5px",
+                    alignItems: "center",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "32px",
+                      fontWeight: "700",
+                      color: colors.neutral,
+                      display: "flex",
+                    }}
+                  >
+                    {creatorScore.toLocaleString() || "-"}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "16px",
+                      color: colors.neutral,
+                      opacity: 0.6,
+                      display: "flex",
+                    }}
+                  >
+                    Creator Score
+                  </div>
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    flex: 1,
+                    border: `3px solid ${colors.base300}`,
+                    borderRadius: "10px",
+                    padding: "5px",
+                    alignItems: "center",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "32px",
+                      fontWeight: "700",
+                      color: colors.neutral,
+                      display: "flex",
+                    }}
+                  >
+                    {creatorRank ? `#${creatorRank.toLocaleString()}` : "-"}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "16px",
+                      color: colors.neutral,
+                      opacity: 0.6,
+                      display: "flex",
+                    }}
+                  >
+                    Creator Rank
                   </div>
                 </div>
               </div>
@@ -449,7 +531,7 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
                 style={{
                   display: "flex",
                   gap: "15px",
-                  marginTop: "3px",
+                  marginTop: "0px",
                   width: "100%",
                 }}
               >
@@ -466,7 +548,7 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
                           ? "rgba(245, 158, 11, 0.15)"
                           : "rgba(239, 68, 68, 0.15)",
                     border: `2px solid ${neynarLevel === "green" ? colors.success : neynarLevel === "yellow" ? colors.warning : colors.error}`,
-                    padding: "12px 18px",
+                    padding: "6px",
                     borderRadius: "10px",
                     flex: 1,
                   }}
@@ -511,7 +593,7 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
                           ? "rgba(245, 158, 11, 0.15)"
                           : "rgba(239, 68, 68, 0.15)",
                     border: `2px solid ${spamLevel === "green" ? colors.success : spamLevel === "yellow" ? colors.warning : colors.error}`,
-                    padding: "12px 18px",
+                    padding: "6px",
                     borderRadius: "10px",
                     flex: 1,
                   }}
@@ -552,7 +634,7 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
                           ? "rgba(245, 158, 11, 0.15)"
                           : "rgba(239, 68, 68, 0.15)",
                     border: `2px solid ${ratioLevel === "green" ? colors.success : ratioLevel === "yellow" ? colors.warning : colors.error}`,
-                    padding: "12px 18px",
+                    padding: "6px",
                     borderRadius: "10px",
                     flex: 1,
                   }}

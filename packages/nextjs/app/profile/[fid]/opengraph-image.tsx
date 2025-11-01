@@ -28,21 +28,50 @@ async function fetchUserData(fid: string) {
   // Use our own API endpoint which fetches from both Neynar and Farcaster
   const baseUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
 
-  const apiUrl = `${baseUrl}/api/user?fid=${fid}`;
-  const response = await fetch(apiUrl, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    next: { revalidate }, // 10 minutes to match image revalidation
-  });
+  const userApiUrl = `${baseUrl}/api/user?fid=${fid}`;
+  const creatorRewardsApiUrl = `${baseUrl}/api/creator-rewards?fid=${fid}`;
 
-  if (!response.ok) {
+  // Fetch both user data and creator rewards in parallel
+  const [userResponse, creatorRewardsResponse] = await Promise.all([
+    fetch(userApiUrl, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      next: { revalidate }, // 10 minutes to match image revalidation
+    }),
+    fetch(creatorRewardsApiUrl, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      next: { revalidate }, // 10 minutes to match image revalidation
+    }),
+  ]);
+
+  if (!userResponse.ok) {
     return null;
   }
 
-  const data = await response.json();
-  return data.user || null;
+  const userData = await userResponse.json();
+  const user = userData.user || null;
+
+  // Add creator rewards data if available
+  if (creatorRewardsResponse.ok) {
+    try {
+      const creatorRewardsData = await creatorRewardsResponse.json();
+      if (user && creatorRewardsData?.scores) {
+        user.creatorRewards = {
+          score: creatorRewardsData.scores.currentPeriodScore,
+          rank: creatorRewardsData.scores.currentPeriodRank,
+        };
+      }
+    } catch (error) {
+      console.error("Failed to parse creator rewards data:", error);
+    }
+  }
+
+  return user;
 }
 
 async function generateImage(fid: string): Promise<Response> {
