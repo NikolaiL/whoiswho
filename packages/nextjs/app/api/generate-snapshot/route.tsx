@@ -15,20 +15,47 @@ const MAX_MINTS_PER_HOUR = 5;
 
 async function fetchUserData(fid: number) {
   const baseUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
-  const apiUrl = `${baseUrl}/api/user?fid=${fid}`;
+  const userApiUrl = `${baseUrl}/api/user?fid=${fid}`;
+  const creatorRewardsApiUrl = `${baseUrl}/api/creator-rewards?fid=${fid}`;
 
-  const response = await fetch(apiUrl, {
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-    cache: "no-store",
-  });
+  // Fetch both user data and creator rewards in parallel
+  const [userResponse, creatorRewardsResponse] = await Promise.all([
+    fetch(userApiUrl, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+    }),
+    fetch(creatorRewardsApiUrl, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+    }),
+  ]);
 
-  if (!response.ok) {
+  if (!userResponse.ok) {
     throw new Error("Failed to fetch user data");
   }
 
-  const data = await response.json();
-  return data.user;
+  const userData = await userResponse.json();
+  const user = userData.user;
+
+  // Add creator rewards data if available
+  if (creatorRewardsResponse.ok) {
+    try {
+      const creatorRewardsData = await creatorRewardsResponse.json();
+      if (creatorRewardsData?.scores) {
+        user.creatorRewards = {
+          score: creatorRewardsData.scores.currentPeriodScore,
+          rank: creatorRewardsData.scores.currentPeriodRank,
+        };
+      }
+    } catch (error) {
+      console.error("Failed to parse creator rewards data:", error);
+      // Continue without creator rewards data
+    }
+  }
+
+  return user;
 }
 
 function checkRateLimit(fid: number): boolean {
@@ -168,37 +195,54 @@ export async function POST(request: NextRequest) {
 
     // Step 7: Create and upload metadata
     const currentDate = new Date().toISOString().split("T")[0];
+
+    const attributes: Array<{ trait_type: string; value: string | number }> = [
+      {
+        trait_type: "FID",
+        value: fid,
+      },
+      {
+        trait_type: "Username",
+        value: user.username,
+      },
+      {
+        trait_type: "Neynar Score",
+        value: user.score || 0,
+      },
+      {
+        trait_type: "Mint Date",
+        value: currentDate,
+      },
+      {
+        trait_type: "Followers",
+        value: user.farcaster?.user?.followerCount || user.follower_count || 0,
+      },
+      {
+        trait_type: "Following",
+        value: user.farcaster?.user?.followingCount || user.following_count || 0,
+      },
+    ];
+
+    // Add creator rewards attributes if available
+    if (user.creatorRewards?.score) {
+      attributes.push({
+        trait_type: "Creator Score",
+        value: user.creatorRewards.score,
+      });
+    }
+    if (user.creatorRewards?.rank) {
+      attributes.push({
+        trait_type: "Creator Rank",
+        value: user.creatorRewards.rank,
+      });
+    }
+
     const metadata = {
       name: `WhoIsWho Profile - @${user.username}`,
       description: `Verified Farcaster profile snapshot for @${user.username} (FID: ${fid}) captured on ${currentDate}. This immutable NFT preserves the user's reputation metrics at this moment in time.`,
       image: `ipfs://${imageHash}`,
       external_url: `https://warpcast.com/${user.username}`,
-      attributes: [
-        {
-          trait_type: "FID",
-          value: fid,
-        },
-        {
-          trait_type: "Username",
-          value: user.username,
-        },
-        {
-          trait_type: "Neynar Score",
-          value: user.score || 0,
-        },
-        {
-          trait_type: "Mint Date",
-          value: currentDate,
-        },
-        {
-          trait_type: "Followers",
-          value: user.farcaster?.user?.followerCount || user.follower_count || 0,
-        },
-        {
-          trait_type: "Following",
-          value: user.farcaster?.user?.followingCount || user.following_count || 0,
-        },
-      ],
+      attributes,
     };
 
     const metadataHash = await uploadMetadataToPinata(metadata);
