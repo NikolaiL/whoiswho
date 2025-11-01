@@ -53,7 +53,8 @@
     "vercel": "yarn workspace @se-2/nextjs vercel",
     "vercel:login": "yarn workspace @se-2/nextjs vercel:login",
     "vercel:yolo": "yarn workspace @se-2/nextjs vercel:yolo",
-    "verify": "yarn hardhat:verify"
+    "verify": "yarn hardhat:verify",
+    "ngrok": "ngrok http http://localhost:3000 --url https://wiw.ngrok.dev"
   },
   "devDependencies": {
     "husky": "~9.1.6",
