@@ -732,7 +732,7 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
                 {/* Your Score */}
                 <div className="rounded-xl border-2 border-base-300 p-4 bg-base-200/50">
                   <h4 className="font-semibold text-sm mb-2 flex items-center gap-1">
-                    Your Score
+                    Score
                     <InfoTooltip title="Current Period Score">
                       <p>Your score for the current reward period.</p>
                     </InfoTooltip>
@@ -746,7 +746,7 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
                 {/* Your Rank */}
                 <div className="rounded-xl border-2 border-base-300 p-4 bg-base-200/50">
                   <h4 className="font-semibold text-sm mb-2 flex items-center gap-1">
-                    Your Rank
+                    Rank
                     <InfoTooltip title="Current Period Rank">
                       <p>Your ranking among all Farcaster creators for the current period.</p>
                     </InfoTooltip>
@@ -776,7 +776,7 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
                 {/* Your Reward */}
                 <div className="rounded-xl border-2 border-base-300 p-4 bg-base-200/50">
                   <h4 className="font-semibold text-sm mb-2 flex items-center gap-1">
-                    Your Reward
+                    Reward
                     <InfoTooltip title="Estimated Reward">
                       <p>
                         Estimated USDC reward based on your current rank. Final rewards are distributed at the end of
