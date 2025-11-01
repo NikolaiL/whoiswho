@@ -752,7 +752,9 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
                     </InfoTooltip>
                   </h4>
                   <div className="text-2xl font-bold text-primary">
-                    #{creatorRewardsData.scores.currentPeriodRank.toLocaleString()}
+                    {creatorRewardsData?.scores?.currentPeriodRank
+                      ? `#${creatorRewardsData.scores.currentPeriodRank.toLocaleString()}`
+                      : "-"}
                   </div>
                   <div className="text-xs text-base-content/60 mt-2">Global ranking</div>
                 </div>
@@ -786,8 +788,8 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
                   </h4>
                   <div className="text-2xl font-bold text-success">
                     {calculateReward(
-                      creatorRewardsData.scores.currentPeriodRank,
-                      creatorRewardsData.metadata.tiers,
+                      creatorRewardsData?.scores?.currentPeriodRank || 0,
+                      creatorRewardsData?.metadata?.tiers || [],
                     ).toFixed(2)}{" "}
                     <span className="text-base">USDC</span>
                   </div>
@@ -803,13 +805,17 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-base-content/70">Previous Score:</span>
                       <span className="text-sm font-mono">
-                        {creatorRewardsData.scores.previousPeriodScore.toLocaleString()}
+                        {creatorRewardsData?.scores?.previousPeriodScore
+                          ? creatorRewardsData.scores.previousPeriodScore.toLocaleString()
+                          : "-"}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-base-content/70">All-Time Score:</span>
                       <span className="text-sm font-mono">
-                        {creatorRewardsData.scores.allTimeScore.toLocaleString()}
+                        {creatorRewardsData?.scores?.allTimeScore
+                          ? creatorRewardsData.scores.allTimeScore.toLocaleString()
+                          : "-"}
                       </span>
                     </div>
                   </div>

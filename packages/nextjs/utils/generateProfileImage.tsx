@@ -479,7 +479,7 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
                       display: "flex",
                     }}
                   >
-                    {creatorScore.toLocaleString() || "-"}
+                    {creatorScore ? creatorScore.toLocaleString() : "-"}
                   </div>
                   <div
                     style={{
