@@ -291,7 +291,9 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
                 @{user.username}
               </p>
               <p className="text-xs text-base-content/50 mt-0.5">FID: {user.fid}</p>
-              {user.profile?.bio?.text && <p className="mt-3 text-base leading-relaxed">{user.profile.bio.text}</p>}
+              {user.profile?.bio?.text && (
+                <p className="mt-3 text-base leading-relaxed break-all">{user.profile.bio.text}</p>
+              )}
             </div>
           </div>
 
