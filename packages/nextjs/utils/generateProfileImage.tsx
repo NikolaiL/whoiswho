@@ -1,5 +1,6 @@
 import React from "react";
 import { ImageResponse } from "next/og";
+import { getQuotientScoreLevel } from "~~/types/quotient";
 
 export async function loadGoogleFont(font: string) {
   const url = `https://fonts.googleapis.com/css2?family=${font}`;
@@ -130,6 +131,10 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
   // Get creator rewards data
   const creatorScore = user.creatorRewards?.score || 0;
   const creatorRank = user.creatorRewards?.rank || 0;
+
+  // Get quotient score data
+  const quotientScore = user.quotientScore?.score || 0;
+  const quotientRank = user.quotientScore?.rank || 0;
 
   // Calculate flag levels
   const neynarLevel = neynarScore >= 0.7 ? "green" : neynarScore >= 0.55 ? "yellow" : "red";
@@ -328,7 +333,7 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
                   viewBox="0 0 18 18"
                   style={{
                     position: "absolute",
-                    bottom: "-20px",
+                    top: "255px",
                     right: "-20px",
                   }}
                 >
@@ -666,6 +671,74 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
                   </div>
                 </div>
               </div>
+
+              {/* Quotient Score Section */}
+              {quotientScore !== null && quotientScore !== undefined && (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "7px",
+                    marginTop: "0px",
+                    marginLeft: "3px",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "20px",
+                      color: colors.neutral,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                    }}
+                  >
+                    <span style={{ fontWeight: "600" }}>Quotient Score:</span>
+                    <span style={{ fontWeight: "700" }}>{quotientScore.toFixed(3)}</span>
+                    <span
+                      style={{
+                        fontSize: "14px",
+                        fontWeight: "600",
+                        padding: "4px 10px",
+                        borderRadius: "6px",
+                        backgroundColor:
+                          getQuotientScoreLevel(quotientScore).level === "success"
+                            ? "rgba(16, 185, 129, 0.15)"
+                            : getQuotientScoreLevel(quotientScore).level === "warning"
+                              ? "rgba(245, 158, 11, 0.15)"
+                              : "rgba(239, 68, 68, 0.15)",
+                        border: `2px solid ${
+                          getQuotientScoreLevel(quotientScore).level === "success"
+                            ? colors.success
+                            : getQuotientScoreLevel(quotientScore).level === "warning"
+                              ? colors.warning
+                              : colors.error
+                        }`,
+                        color:
+                          getQuotientScoreLevel(quotientScore).level === "success"
+                            ? colors.success
+                            : getQuotientScoreLevel(quotientScore).level === "warning"
+                              ? colors.warning
+                              : colors.error,
+                        display: "flex",
+                      }}
+                    >
+                      {getQuotientScoreLevel(quotientScore).label}
+                    </span>
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "20px",
+                      color: colors.neutral,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                    }}
+                  >
+                    <span style={{ fontWeight: "600" }}>Quotient Rank:</span>
+                    <span style={{ fontWeight: "700" }}>#{quotientRank.toLocaleString()}</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -673,15 +746,20 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
           <div
             style={{
               position: "absolute",
-              bottom: "30px",
-              right: "50px",
-              fontSize: "20px",
+              bottom: "45px",
+              right: "52px",
+              fontSize: "16px",
               color: colors.neutral,
-              opacity: 0.6,
+              opacity: 0.5,
               display: "flex",
+              flexDirection: "column",
+              gap: "0px",
+              alignItems: "flex-end",
             }}
           >
-            Verify Users • Check Reputation • Avoid Spam
+            <p style={{ margin: 0 }}>Verify Users</p>
+            <p style={{ margin: 0 }}>Check Reputation</p>
+            <p style={{ margin: 0 }}>Avoid Spam</p>
           </div>
 
           {/* Verification Stamp */}

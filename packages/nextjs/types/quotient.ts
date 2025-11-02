@@ -26,13 +26,13 @@ export interface QuotientScoreLevel {
 export const QUOTIENT_SCORE_TIERS: Record<string, QuotientScoreLevel> = {
   EXCEPTIONAL: {
     level: "success",
-    label: "Exceptional",
-    description: "Platform superstars, maximum influence",
+    label: "🌟 Exceptional",
+    description: "Platform superstar, maximum influence",
   },
   ELITE: {
     level: "success",
-    label: "Elite",
-    description: "Top-tier creators, community leaders",
+    label: "⭐️ Elite",
+    description: "Top-tier creator, community leader",
   },
   INFLUENTIAL: {
     level: "success",
@@ -42,7 +42,7 @@ export const QUOTIENT_SCORE_TIERS: Record<string, QuotientScoreLevel> = {
   ACTIVE: {
     level: "success",
     label: "Active",
-    description: "Regular contributors, solid engagement",
+    description: "Regular contributor, solid engagement",
   },
   CASUAL: {
     level: "warning",
@@ -51,8 +51,8 @@ export const QUOTIENT_SCORE_TIERS: Record<string, QuotientScoreLevel> = {
   },
   INACTIVE_SPAM: {
     level: "error",
-    label: "Inactive/Spam",
-    description: "Bot accounts, farmers, inactive users",
+    label: "Inactive OR Spam",
+    description: "Can be a bot/farmer account OR just an inactive user",
   },
 };
 

@@ -16,9 +16,9 @@ import { ArrowUpIcon, CheckIcon, ClipboardDocumentIcon, ShareIcon } from "@heroi
 import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import { useCreatorRewards } from "~~/hooks/useCreatorRewards";
 import { useFarcasterUser } from "~~/hooks/useFarcasterUser";
-//import { useQuotientScore } from "~~/hooks/useQuotientScore";
-//import { getQuotientScoreLevel } from "~~/types/quotient";
+import { useQuotientScore } from "~~/hooks/useQuotientScore";
 import { calculateReward, formatTimeRemaining } from "~~/types/creator-rewards";
+import { getQuotientScoreLevel } from "~~/types/quotient";
 import { transformImgurUrl } from "~~/utils/generateProfileImage";
 import { calculateFollowerRatio, getNeynarScoreLevel, parseSpamLabel } from "~~/utils/profileMetrics";
 import { notification } from "~~/utils/scaffold-eth";
@@ -37,7 +37,7 @@ const FALLBACK_AVATAR = "https://farcaster.xyz/avatar.png";
  */
 export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
   const { user, isLoading, error } = useFarcasterUser({ fid });
-  //const { data: quotientData, isLoading: isLoadingQuotient } = useQuotientScore({ fid });
+  const { data: quotientData, isLoading: isLoadingQuotient } = useQuotientScore({ fid });
   const { data: creatorRewardsData, isLoading: isLoadingCreatorRewards } = useCreatorRewards({ fid });
   const {
     openLink,
@@ -175,6 +175,8 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
       console.error("Mint error:", error);
       const errorMessage = error instanceof Error ? error.message : "Failed to mint NFT";
       notification.error(errorMessage);
+      // delete image and meta files from pinata
+
       setMintStep("idle");
       setIsMinting(false);
     }
@@ -553,138 +555,7 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
         </CardBody>
       </Card>
 
-      {/* SECTION 2.7: QUOTIENT SCORE */}
-      {/* <Card variant="base" padding="default" className="max-w-2xl mx-auto my-6">
-        <CardBody>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-lg flex items-center gap-2">
-              Quotient Score
-              <InfoTooltip title="What is Quotient Score?">
-                <p>
-                  <strong>Quotient Score</strong> is a variation of the PageRank algorithm optimized for Farcaster,
-                  measuring momentum and relevance based on the quantity and quality of incoming engagement.
-                </p>
-                <p className="mt-2">
-                  The algorithm weights recent interactions more heavily and ignores follower counts to avoid advantages
-                  from automated/spam followers, focusing instead on genuine engagement patterns.
-                </p>
-                <p className="mt-2">
-                  <strong>Score Tiers:</strong>
-                </p>
-                <ul className="list-disc list-inside text-xs mt-1 space-y-1">
-                  <li className="text-success">≥ 0.9: Exceptional - Platform superstars, maximum influence</li>
-                  <li className="text-success">0.8-0.89: Elite - Top-tier creators, community leaders</li>
-                  <li className="text-success">0.75-0.79: Influential - High-quality content, strong network</li>
-                  <li className="text-success">0.6-0.74: Active - Regular contributors, solid engagement</li>
-                  <li className="text-warning">0.5-0.59: Casual - Occasional users, low engagement</li>
-                  <li className="text-error">&lt; 0.5: Inactive/Spam - Bot accounts, farmers, inactive users</li>
-                </ul>
-                <p className="text-xs opacity-70 italic mt-2 mb-0">
-                  Data provided by{" "}
-                  <a
-                    href="https://docs.quotient.social"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline"
-                  >
-                    Quotient
-                  </a>
-                </p>
-              </InfoTooltip>
-            </h3>
-          </div>
-
-          {isLoadingQuotient ? (
-            <div className="flex justify-center items-center py-8">
-              <span className="loading loading-spinner loading-md"></span>
-            </div>
-          ) : quotientData ? (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                
-                <div className="rounded-xl border-2 border-base-300 p-4 bg-base-200/50">
-                  <h4 className="font-semibold text-sm mb-2 flex items-center gap-1">
-                    Score
-                    <InfoTooltip title="Quotient Score">
-                      <p>
-                        A normalized score (0-1) measuring account momentum and relevance based on the quality of
-                        incoming engagement.
-                      </p>
-                    </InfoTooltip>
-                  </h4>
-                  <div className="flex items-baseline gap-2">
-                    <div
-                      className={`text-2xl font-bold ${
-                        getQuotientScoreLevel(quotientData.quotientScore).level === "success"
-                          ? "text-success"
-                          : getQuotientScoreLevel(quotientData.quotientScore).level === "warning"
-                            ? "text-warning"
-                            : "text-error"
-                      }`}
-                    >
-                      {quotientData.quotientScore.toFixed(2)}
-                    </div>
-                  </div>
-                  <div className="mt-2">
-                    <Badge
-                      variant={getQuotientScoreLevel(quotientData.quotientScore).level}
-                      size="sm"
-                      className="inline-block"
-                    >
-                      {getQuotientScoreLevel(quotientData.quotientScore).label}
-                    </Badge>
-                  </div>
-                  <div className="text-xs text-base-content/60 mt-2">
-                    {getQuotientScoreLevel(quotientData.quotientScore).description}
-                  </div>
-                </div>
-
-                
-                <div className="rounded-xl border-2 border-base-300 p-4 bg-base-200/50">
-                  <h4 className="font-semibold text-sm mb-2 flex items-center gap-1">
-                    Rank
-                    <InfoTooltip title="Quotient Rank">
-                      <p>The user&apos;s ranking among all Farcaster users based on Quotient Score.</p>
-                    </InfoTooltip>
-                  </h4>
-                  <div className="text-2xl font-bold text-primary">#{quotientData.quotientRank.toLocaleString()}</div>
-                  <div className="text-xs text-base-content/60 mt-2">Global ranking</div>
-                </div>
-
-                <div className="rounded-xl border-2 border-base-300 p-4 bg-base-200/50">
-                  <h4 className="font-semibold text-sm mb-2">Profile</h4>
-                  <button
-                    onClick={() => openLink(quotientData.quotientProfileUrl)}
-                    className="btn btn-sm btn-primary w-full mt-1"
-                  >
-                    View on Quotient
-                  </button>
-                  <div className="text-xs text-base-content/60 mt-2">See detailed analytics</div>
-                </div>
-              </div>
-
-              <details className="mt-4 collapse collapse-arrow border border-base-300 bg-base-200/30">
-                <summary className="collapse-title text-sm font-medium">Advanced Metrics</summary>
-                <div className="collapse-content">
-                  <div className="pt-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-base-content/70">Raw Score:</span>
-                      <span className="text-sm font-mono">{quotientData.quotientScoreRaw.toFixed(6)}</span>
-                    </div>
-                    <div className="text-xs text-base-content/50 mt-1">
-                      Unprocessed score before normalization
-                    </div>
-                  </div>
-                </div>
-              </details>
-            </>
-          ) : (
-            <div className="text-center py-8 text-base-content/50">No Quotient Score data available</div>
-          )}
-        </CardBody>
-      </Card> */}
-
-      {/* SECTION 2.8: FARCASTER CREATOR REWARDS */}
+      {/* SECTION 2.7: FARCASTER CREATOR REWARDS */}
       <Card variant="base" padding="default" className="max-w-2xl mx-auto my-6">
         <CardBody>
           <div className="flex items-center justify-between mb-4">
@@ -824,6 +695,136 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
             </>
           ) : (
             <div className="text-center py-8 text-base-content/50">No Creator Rewards data available</div>
+          )}
+        </CardBody>
+      </Card>
+
+      {/* SECTION 2.8: QUOTIENT SCORE */}
+      <Card variant="base" padding="default" className="max-w-2xl mx-auto my-6">
+        <CardBody>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-lg flex items-center gap-2">
+              Quotient Score
+              <InfoTooltip title="What is Quotient Score?">
+                <p>
+                  <strong>Quotient Score</strong> is a variation of the PageRank algorithm optimized for Farcaster,
+                  measuring momentum and relevance based on the quantity and quality of incoming engagement.
+                </p>
+                <p className="mt-2">
+                  The algorithm weights recent interactions more heavily and ignores follower counts to avoid advantages
+                  from automated/spam followers, focusing instead on genuine engagement patterns.
+                </p>
+                <p className="mt-2">
+                  <strong>Score Tiers:</strong>
+                </p>
+                <ul className="list-disc list-inside text-xs mt-1 space-y-1">
+                  <li className="text-success">🌟 ≥ 0.9: Exceptional - Platform superstars, maximum influence</li>
+                  <li className="text-success">💎 0.8-0.89: Elite - Top-tier creators, community leaders</li>
+                  <li className="text-success">🔑 0.75-0.79: Influential - High-quality content, strong network</li>
+                  <li className="text-success">✅ 0.6-0.74: Active - Regular contributors, solid engagement</li>
+                  <li className="text-warning">⚠️ 0.5-0.59: Casual - Occasional users, low engagement</li>
+                  <li className="text-error">❌ &lt; 0.5: Inactive/Spam - Bot accounts, farmers, inactive users</li>
+                </ul>
+                <p className="text-xs opacity-70 italic mt-2 mb-0">
+                  Data provided by{" "}
+                  <a
+                    href="https://docs.quotient.social"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline"
+                  >
+                    Quotient
+                  </a>
+                </p>
+              </InfoTooltip>
+            </h3>
+          </div>
+
+          {isLoadingQuotient ? (
+            <div className="flex justify-center items-center py-8">
+              <span className="loading loading-spinner loading-md"></span>
+            </div>
+          ) : quotientData ? (
+            <>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="rounded-xl border-2 border-base-300 p-4 bg-base-200/50">
+                  <h4 className="font-semibold text-sm mb-2 flex items-center gap-1">
+                    Score
+                    <InfoTooltip title="Quotient Score">
+                      <p>
+                        A normalized score (0-1) measuring account momentum and relevance based on the quality of
+                        incoming engagement.
+                      </p>
+                      <p className="mt-2">
+                        <strong>Score Tiers:</strong>
+                      </p>
+                      <ul className="list-disc list-inside text-xs mt-1 space-y-1">
+                        <li className="text-success">🌟 ≥ 0.9: Exceptional - Platform superstars, maximum influence</li>
+                        <li className="text-success">💎 0.8-0.89: Elite - Top-tier creators, community leaders</li>
+                        <li className="text-success">
+                          🔑 0.75-0.79: Influential - High-quality content, strong network
+                        </li>
+                        <li className="text-success">✅ 0.6-0.74: Active - Regular contributors, solid engagement</li>
+                        <li className="text-warning">
+                          ⚠️ 0.5-0.59: Casual - Occasional users, low engagement. Potentially spam or bot accounts.
+                        </li>
+                        <li className="text-error">
+                          ❌ &lt; 0.5: Inactive/Spam - Bot accounts, farmers, inactive users
+                        </li>
+                      </ul>
+                    </InfoTooltip>
+                  </h4>
+                  <div className="flex items-baseline gap-2">
+                    <div
+                      className={`text-2xl font-bold ${
+                        getQuotientScoreLevel(quotientData.quotientScore).level === "success"
+                          ? "text-success"
+                          : getQuotientScoreLevel(quotientData.quotientScore).level === "warning"
+                            ? "text-warning"
+                            : "text-error"
+                      }`}
+                    >
+                      {quotientData.quotientScore.toFixed(3)}
+                    </div>
+                  </div>
+                  <div className="mt-2">
+                    <Badge
+                      variant={getQuotientScoreLevel(quotientData.quotientScore).level}
+                      size="sm"
+                      className="inline-block"
+                    >
+                      <span className="flex items-center gap-1">
+                        <span>{getQuotientScoreLevel(quotientData.quotientScore).label}</span>
+                      </span>
+                    </Badge>
+                  </div>
+                  <div className="text-xs text-base-content/60 mt-2">
+                    {getQuotientScoreLevel(quotientData.quotientScore).description}
+                  </div>
+                </div>
+
+                <div className="rounded-xl border-2 border-base-300 p-4 bg-base-200/50">
+                  <h4 className="font-semibold text-sm mb-2 flex items-center gap-1">
+                    Rank
+                    <InfoTooltip title="Quotient Rank">
+                      <p>The user&apos;s ranking among all Farcaster users based on Quotient Score.</p>
+                    </InfoTooltip>
+                  </h4>
+                  <div className="text-2xl font-bold text-primary">#{quotientData.quotientRank.toLocaleString()}</div>
+                  <div className="text-xs text-base-content/60 mt-2">Global ranking</div>
+                </div>
+              </div>
+              <div className="w-full">
+                <button
+                  onClick={() => openLink(new URL("https://" + quotientData.quotientProfileUrl).toString())}
+                  className="btn btn-primary w-full mt-1"
+                >
+                  View on Quotient
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-8 text-base-content/50">No Quotient Score data available</div>
           )}
         </CardBody>
       </Card>

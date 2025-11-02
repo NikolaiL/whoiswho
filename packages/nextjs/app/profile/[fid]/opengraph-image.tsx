@@ -30,9 +30,10 @@ async function fetchUserData(fid: string) {
 
   const userApiUrl = `${baseUrl}/api/user?fid=${fid}`;
   const creatorRewardsApiUrl = `${baseUrl}/api/creator-rewards?fid=${fid}`;
+  const quotientScoreApiUrl = `${baseUrl}/api/quotient-score?fid=${fid}`;
 
-  // Fetch both user data and creator rewards in parallel
-  const [userResponse, creatorRewardsResponse] = await Promise.all([
+  // Fetch all data in parallel
+  const [userResponse, creatorRewardsResponse, quotientScoreResponse] = await Promise.all([
     fetch(userApiUrl, {
       method: "GET",
       headers: {
@@ -41,6 +42,13 @@ async function fetchUserData(fid: string) {
       next: { revalidate }, // 10 minutes to match image revalidation
     }),
     fetch(creatorRewardsApiUrl, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      next: { revalidate }, // 10 minutes to match image revalidation
+    }),
+    fetch(quotientScoreApiUrl, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -68,6 +76,21 @@ async function fetchUserData(fid: string) {
       }
     } catch (error) {
       console.error("Failed to parse creator rewards data:", error);
+    }
+  }
+
+  // Add quotient score data if available
+  if (quotientScoreResponse.ok) {
+    try {
+      const quotientScoreData = await quotientScoreResponse.json();
+      if (user && quotientScoreData?.data && quotientScoreData.data.length > 0) {
+        user.quotientScore = {
+          score: quotientScoreData.data[0].quotientScore,
+          rank: quotientScoreData.data[0].quotientRank,
+        };
+      }
+    } catch (error) {
+      console.error("Failed to parse quotient score data:", error);
     }
   }
 

@@ -17,15 +17,21 @@ async function fetchUserData(fid: number) {
   const baseUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
   const userApiUrl = `${baseUrl}/api/user?fid=${fid}`;
   const creatorRewardsApiUrl = `${baseUrl}/api/creator-rewards?fid=${fid}`;
+  const quotientScoreApiUrl = `${baseUrl}/api/quotient-score?fid=${fid}`;
 
-  // Fetch both user data and creator rewards in parallel
-  const [userResponse, creatorRewardsResponse] = await Promise.all([
+  // Fetch all data in parallel
+  const [userResponse, creatorRewardsResponse, quotientScoreResponse] = await Promise.all([
     fetch(userApiUrl, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
       cache: "no-store",
     }),
     fetch(creatorRewardsApiUrl, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+    }),
+    fetch(quotientScoreApiUrl, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
       cache: "no-store",
@@ -52,6 +58,22 @@ async function fetchUserData(fid: number) {
     } catch (error) {
       console.error("Failed to parse creator rewards data:", error);
       // Continue without creator rewards data
+    }
+  }
+
+  // Add quotient score data if available
+  if (quotientScoreResponse.ok) {
+    try {
+      const quotientScoreData = await quotientScoreResponse.json();
+      if (quotientScoreData?.data && quotientScoreData.data.length > 0) {
+        user.quotientScore = {
+          score: quotientScoreData.data[0].quotientScore,
+          rank: quotientScoreData.data[0].quotientRank,
+        };
+      }
+    } catch (error) {
+      console.error("Failed to parse quotient score data:", error);
+      // Continue without quotient score data
     }
   }
 
@@ -234,6 +256,20 @@ export async function POST(request: NextRequest) {
       attributes.push({
         trait_type: "Creator Rank",
         value: user.creatorRewards.rank,
+      });
+    }
+
+    // Add quotient score attributes if available
+    if (user.quotientScore?.score) {
+      attributes.push({
+        trait_type: "Quotient Score",
+        value: user.quotientScore.score,
+      });
+    }
+    if (user.quotientScore?.rank) {
+      attributes.push({
+        trait_type: "Quotient Rank",
+        value: user.quotientScore.rank,
       });
     }
 
