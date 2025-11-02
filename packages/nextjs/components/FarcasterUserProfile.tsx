@@ -746,7 +746,7 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
             </div>
           ) : quotientData ? (
             <>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="rounded-xl border-2 border-base-300 p-4 bg-base-200/50">
                   <h4 className="font-semibold text-sm mb-2 flex items-center gap-1">
                     Score
