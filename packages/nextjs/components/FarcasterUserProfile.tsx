@@ -812,7 +812,9 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
                       <p>The user&apos;s ranking among all Farcaster users based on Quotient Score.</p>
                     </InfoTooltip>
                   </h4>
-                  <div className="text-2xl font-bold text-primary">#{quotientData.quotientRank.toLocaleString()}</div>
+                  <div className="text-2xl font-bold text-primary">
+                    #{quotientData?.quotientRank?.toLocaleString() || "-"}
+                  </div>
                   <div className="text-xs text-base-content/60 mt-2">Global ranking</div>
                 </div>
               </div>

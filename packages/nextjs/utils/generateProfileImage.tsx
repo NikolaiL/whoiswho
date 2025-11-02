@@ -735,7 +735,9 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
                     }}
                   >
                     <span style={{ fontWeight: "600" }}>Quotient Rank:</span>
-                    <span style={{ fontWeight: "700" }}>#{quotientRank.toLocaleString()}</span>
+                    <span style={{ fontWeight: "700" }}>
+                      {quotientRank ? `#${quotientRank.toLocaleString()}` : "-"}
+                    </span>
                   </div>
                 </div>
               )}
