@@ -910,7 +910,7 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
                         </p>
                       </InfoTooltip>
                     </h4>
-                    <div className="text-2xl font-bold text-secondary">
+                    <div className="text-2xl font-bold text-primary">
                       {talentData?.creatorScore?.points ? talentData.creatorScore.points.toLocaleString() : "-"}
                     </div>
                     <div className="text-xs text-base-content/60 mt-2">
