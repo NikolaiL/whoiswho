@@ -17,6 +17,7 @@ import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaf
 import { useCreatorRewards } from "~~/hooks/useCreatorRewards";
 import { useFarcasterUser } from "~~/hooks/useFarcasterUser";
 import { useQuotientScore } from "~~/hooks/useQuotientScore";
+import { useTalentProtocol } from "~~/hooks/useTalentProtocol";
 import { calculateReward, formatTimeRemaining } from "~~/types/creator-rewards";
 import { getQuotientScoreLevel } from "~~/types/quotient";
 import { transformImgurUrl } from "~~/utils/generateProfileImage";
@@ -39,6 +40,7 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
   const { user, isLoading, error } = useFarcasterUser({ fid });
   const { data: quotientData, isLoading: isLoadingQuotient } = useQuotientScore({ fid });
   const { data: creatorRewardsData, isLoading: isLoadingCreatorRewards } = useCreatorRewards({ fid });
+  const { data: talentData, isLoading: isLoadingTalent } = useTalentProtocol({ fid });
   const {
     openLink,
     openProfile,
@@ -829,6 +831,113 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
             </>
           ) : (
             <div className="text-center py-8 text-base-content/50">No Quotient Score data available</div>
+          )}
+        </CardBody>
+      </Card>
+
+      {/* SECTION 2.9: TALENT PROTOCOL SCORES */}
+      <Card variant="base" padding="default" className="max-w-2xl mx-auto my-6">
+        <CardBody>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-lg flex items-center gap-2">
+              Talent Protocol Scores
+              <InfoTooltip title="What is Talent Protocol?">
+                <p>
+                  <strong>Talent Protocol</strong> is a reputation protocol that tracks and verifies builder and creator
+                  contributions across web3 platforms.
+                </p>
+                <p className="mt-2">
+                  <strong>Builder Score:</strong> Measures technical contributions, projects built, and development
+                  activity across platforms like GitHub, Farcaster, and more.
+                </p>
+                <p className="mt-2">
+                  <strong>Creator Score:</strong> Measures content creation, community engagement, and creative
+                  contributions across web3 platforms.
+                </p>
+                <p className="text-xs opacity-70 italic mt-2 mb-0">
+                  Data provided by{" "}
+                  <a href="https://talentprotocol.com" target="_blank" rel="noopener noreferrer" className="underline">
+                    Talent Protocol
+                  </a>
+                </p>
+              </InfoTooltip>
+            </h3>
+          </div>
+
+          {isLoadingTalent ? (
+            <div className="flex justify-center items-center py-8">
+              <span className="loading loading-spinner loading-md"></span>
+            </div>
+          ) : talentData && (talentData.builderScore || talentData.creatorScore) ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Builder Score */}
+                {talentData.builderScore && (
+                  <div className="rounded-xl border-2 border-base-300 p-4 bg-base-200/50">
+                    <h4 className="font-semibold text-sm mb-2 flex items-center gap-1">
+                      Builder Score
+                      <InfoTooltip title="Builder Score">
+                        <p>
+                          Measures technical contributions, projects built, and development activity. Higher scores
+                          indicate more substantial building contributions to web3.
+                        </p>
+                      </InfoTooltip>
+                    </h4>
+                    <div className="text-2xl font-bold text-primary">
+                      {talentData?.builderScore?.points ? talentData.builderScore.points.toLocaleString() : "-"}
+                    </div>
+                    <div className="text-xs text-base-content/60 mt-2">
+                      Rank: {talentData?.builderScore?.rank ? `#${talentData.builderScore.rank.toLocaleString()}` : "-"}
+                    </div>
+                    <div className="text-xs text-base-content/40 mt-1">
+                      Updated:{" "}
+                      {talentData?.builderScore?.lastCalculated
+                        ? new Date(talentData.builderScore.lastCalculated).toLocaleDateString()
+                        : "-"}
+                    </div>
+                  </div>
+                )}
+
+                {/* Creator Score */}
+                {talentData.creatorScore && (
+                  <div className="rounded-xl border-2 border-base-300 p-4 bg-base-200/50">
+                    <h4 className="font-semibold text-sm mb-2 flex items-center gap-1">
+                      Creator Score
+                      <InfoTooltip title="Creator Score">
+                        <p>
+                          Measures content creation, community engagement, and creative contributions. Higher scores
+                          indicate more impactful creative work in web3.
+                        </p>
+                      </InfoTooltip>
+                    </h4>
+                    <div className="text-2xl font-bold text-secondary">
+                      {talentData?.creatorScore?.points ? talentData.creatorScore.points.toLocaleString() : "-"}
+                    </div>
+                    <div className="text-xs text-base-content/60 mt-2">
+                      Rank: {talentData?.creatorScore?.rank ? `#${talentData.creatorScore.rank.toLocaleString()}` : "-"}
+                    </div>
+                    <div className="text-xs text-base-content/40 mt-1">
+                      Updated:{" "}
+                      {talentData?.creatorScore?.lastCalculated
+                        ? new Date(talentData.creatorScore.lastCalculated).toLocaleDateString()
+                        : "-"}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* View Profile Button */}
+              <div className="w-full">
+                <button
+                  onClick={() => openLink(`https://app.talentprotocol.com/${talentData.profileId}`)}
+                  className="btn btn-primary w-full mt-4"
+                >
+                  View on Talent Protocol
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-8 text-base-content/50">No Talent Protocol data available</div>
           )}
         </CardBody>
       </Card>

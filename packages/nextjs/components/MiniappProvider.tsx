@@ -103,7 +103,7 @@ export const MiniappProvider = ({ children }: MiniappProviderProps) => {
       if (params?.fid) {
         if (typeof window !== "undefined") window.open(`https://farcaster.xyz/~/profiles/${params.fid}`, "_blank");
       } else if (params?.username) {
-        if (typeof window !== "undefined") window.open(`https://warpcast.com/${params.username}`, "_blank");
+        if (typeof window !== "undefined") window.open(`https://farcaster.xyz/${params.username}`, "_blank");
       }
     } catch (err) {
       console.error("openProfile error", err);
