@@ -129,8 +129,8 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
       const profileUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/profile/${user.fid}`;
       const text =
         fid == miniappUser?.fid
-          ? `Here is my profile on WhoIsWho:\n\nVerify reputation, check flags, and avoid spam accounts - WhoIsWho by @NikolaiLeb\n\nLike it? Vote for it:`
-          : `Here is @${user.username}'s profile on WhoIsWho:\n\nVerify reputation, check flags, and avoid spam accounts - WhoIsWho by @NikolaiLeb\n\nLike it? Vote for it:`;
+          ? `Here is my profile on WhoIsWho.\n\nVerify reputation, check flags, and avoid spam accounts - WhoIsWho by @NikolaiLeb`
+          : `Here is @${user.username}'s profile on WhoIsWho.\n\nVerify reputation, check flags, and avoid spam accounts - WhoIsWho by @NikolaiLeb`;
 
       const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(profileUrl)}&hashtags=WhoIsWho,Farcaster`;
 
