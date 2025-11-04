@@ -123,6 +123,25 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
     }
   };
 
+  const handleShareOnX = () => {
+    if (!user) return;
+    try {
+      const profileUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/profile/${user.fid}`;
+      const text =
+        fid == miniappUser?.fid
+          ? `Here is my profile on WhoIsWho:\n\nVerify reputation, check flags, and avoid spam accounts - WhoIsWho by @NikolaiLeb\n\nLike it? Vote for it:`
+          : `Here is @${user.username}'s profile on WhoIsWho:\n\nVerify reputation, check flags, and avoid spam accounts - WhoIsWho by @NikolaiLeb\n\nLike it? Vote for it:`;
+
+      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(profileUrl)}&hashtags=WhoIsWho,Farcaster`;
+
+      openLink(twitterUrl);
+      notification.success("X composer opened!");
+    } catch (err) {
+      console.error("Failed to share on X:", err);
+      notification.error("Failed to open X composer");
+    }
+  };
+
   const handleMint = async () => {
     try {
       setIsMinting(true);
@@ -502,11 +521,25 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
             </div>
 
             {/* Buttons Grid */}
-            <div className={miniappUser?.fid === fid ? "grid grid-cols-1 sm:grid-cols-2 gap-3" : ""}>
-              {/* Share Button */}
+            <div
+              className={
+                miniappUser?.fid === fid
+                  ? "grid grid-cols-1 sm:grid-cols-3 gap-3"
+                  : "grid grid-cols-1 sm:grid-cols-2 gap-3"
+              }
+            >
+              {/* Share on Farcaster Button */}
               <button onClick={handleShare} disabled={isSharing} className="btn btn-primary w-full gap-2">
                 <ShareIcon className="w-5 h-5" />
                 {isSharing ? "Opening Composer..." : `Share on ${clientName}`}
+              </button>
+
+              {/* Share on X Button */}
+              <button onClick={handleShareOnX} className="btn btn-outline btn-primary w-full gap-2">
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
+                Share on X
               </button>
 
               {/* Mint Button, should only show if fid is the same as the miniapp user fid */}
