@@ -132,7 +132,7 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
           ? `Here is my profile on WhoIsWho.\n\nVerify reputation, check flags, and avoid spam accounts - WhoIsWho by @NikolaiLeb`
           : `Here is @${user.username}'s profile on WhoIsWho.\n\nVerify reputation, check flags, and avoid spam accounts - WhoIsWho by @NikolaiLeb`;
 
-      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(profileUrl)}&hashtags=WhoIsWho,Farcaster`;
+      const twitterUrl = `https://x.com/intent/post?text=${encodeURIComponent(text)}&url=${encodeURIComponent(profileUrl)}&hashtags=WhoIsWho,Farcaster`;
 
       openLink(twitterUrl);
       notification.success("X composer opened!");
