@@ -146,6 +146,12 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
   const followerRatio = followingCount === 0 ? 0 : followerCount / followingCount;
   const ratioLevel = followerRatio >= 0.8 ? "green" : followerRatio >= 0.2 ? "yellow" : "red";
 
+  const talentBuilderScore = user.talentScore?.builderScore?.points || 0;
+  const talentBuilderRank = user.talentScore?.builderScore?.rank || 0;
+
+  const talentCreatorScore = user.talentScore?.creatorScore?.points || 0;
+  const talentCreatorRank = user.talentScore?.creatorScore?.rank || 0;
+
   // Determine stamp color based on worst flag
   let stampLevel: "green" | "yellow" | "red" = "green";
   if (neynarLevel === "red" || spamLevel === "red" || ratioLevel === "red") {
@@ -175,7 +181,7 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
 
   // Define colors
   const colors = {
-    primary: "#8b5cf6",
+    primary: "#A784FF",
     accent: "#06b6d4",
     neutral: "#f1f5f9",
     success: "#10b981",
@@ -365,23 +371,24 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
               {/* Display Name */}
               <div
                 style={{
-                  fontSize: "54px",
+                  fontSize: "36px",
                   fontWeight: "700",
                   color: colors.neutral,
                   display: "flex",
                   alignItems: "center",
                   gap: "10px",
-                  marginTop: "-10px",
+                  marginTop: "0px",
+                  height: "42px",
                 }}
               >
-                <span>{user.display_name}</span>
+                <span>{user.display_name || " "}</span>
               </div>
 
               {/* Username */}
               <div
                 style={{
                   fontSize: "32px",
-                  color: colors.accent,
+                  color: colors.primary,
                   marginTop: "-23px",
                   display: "flex",
                 }}
@@ -393,8 +400,11 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
               <div
                 style={{
                   display: "flex",
+                  position: "absolute",
+                  top: "0px",
+                  right: "0px",
+                  width: "300px",
                   gap: "15px",
-                  width: "100%",
                   marginTop: "0px",
                   alignItems: "center",
                   justifyContent: "center",
@@ -413,7 +423,7 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
                 >
                   <div
                     style={{
-                      fontSize: "32px",
+                      fontSize: "24px",
                       fontWeight: "700",
                       color: colors.neutral,
                       display: "flex",
@@ -445,7 +455,7 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
                 >
                   <div
                     style={{
-                      fontSize: "32px",
+                      fontSize: "24px",
                       fontWeight: "700",
                       color: colors.neutral,
                       display: "flex",
@@ -462,71 +472,6 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
                     }}
                   >
                     Following
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    flex: 1,
-                    border: `3px solid ${colors.base300}`,
-                    borderRadius: "10px",
-                    padding: "5px",
-                    alignItems: "center",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "32px",
-                      fontWeight: "700",
-                      color: colors.neutral,
-                      display: "flex",
-                    }}
-                  >
-                    {creatorScore ? creatorScore.toLocaleString() : "-"}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "16px",
-                      color: colors.neutral,
-                      opacity: 0.6,
-                      display: "flex",
-                    }}
-                  >
-                    Creator Score
-                  </div>
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    flex: 1,
-                    border: `3px solid ${colors.base300}`,
-                    borderRadius: "10px",
-                    padding: "5px",
-                    alignItems: "center",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "32px",
-                      fontWeight: "700",
-                      color: colors.neutral,
-                      display: "flex",
-                    }}
-                  >
-                    {creatorRank ? `#${creatorRank.toLocaleString()}` : "-"}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "16px",
-                      color: colors.neutral,
-                      opacity: 0.6,
-                      display: "flex",
-                    }}
-                  >
-                    Creator Rank
                   </div>
                 </div>
               </div>
@@ -672,75 +617,350 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
                 </div>
               </div>
 
-              {/* Quotient Score Section */}
-              {quotientScore !== null && quotientScore !== undefined && (
+              {/* Other Scores Section */}
+              <div
+                style={{
+                  display: "flex",
+                  gap: "15px",
+                  marginTop: "0px",
+                  width: "100%",
+                }}
+              >
                 <div
                   style={{
                     display: "flex",
-                    flexDirection: "column",
-                    gap: "7px",
+                    gap: "15px",
+                    width: "100%",
                     marginTop: "0px",
-                    marginLeft: "3px",
+                    alignItems: "flex-start",
+                    justifyContent: "flex-start",
                   }}
                 >
                   <div
                     style={{
-                      fontSize: "20px",
-                      color: colors.neutral,
                       display: "flex",
+                      flexDirection: "column",
+                      border: `3px solid ${colors.base300}`,
+                      borderRadius: "10px",
+                      padding: "5px",
+                      flex: 0.5,
                       alignItems: "center",
-                      gap: "8px",
                     }}
                   >
-                    <span style={{ fontWeight: "600" }}>Quotient Score:</span>
-                    <span style={{ fontWeight: "700" }}>{quotientScore.toFixed(3)}</span>
-                    <span
+                    <div
                       style={{
-                        fontSize: "14px",
-                        fontWeight: "600",
-                        padding: "4px 10px",
-                        borderRadius: "6px",
-                        backgroundColor:
-                          getQuotientScoreLevel(quotientScore).level === "success"
-                            ? "rgba(16, 185, 129, 0.15)"
-                            : getQuotientScoreLevel(quotientScore).level === "warning"
-                              ? "rgba(245, 158, 11, 0.15)"
-                              : "rgba(239, 68, 68, 0.15)",
-                        border: `2px solid ${
-                          getQuotientScoreLevel(quotientScore).level === "success"
-                            ? colors.success
-                            : getQuotientScoreLevel(quotientScore).level === "warning"
-                              ? colors.warning
-                              : colors.error
-                        }`,
-                        color:
-                          getQuotientScoreLevel(quotientScore).level === "success"
-                            ? colors.success
-                            : getQuotientScoreLevel(quotientScore).level === "warning"
-                              ? colors.warning
-                              : colors.error,
+                        fontSize: "20px",
+                        fontWeight: "400",
+                        color: colors.neutral,
                         display: "flex",
+                        alignItems: "flex-start",
+                        justifyContent: "center",
+                        opacity: 0.8,
                       }}
                     >
-                      {getQuotientScoreLevel(quotientScore).label}
-                    </span>
+                      Talent Score
+                    </div>
+                    <hr
+                      style={{
+                        width: "100%",
+                        margin: "1px 0",
+                        borderColor: colors.base300,
+                        borderWidth: "1px",
+                        borderStyle: "solid",
+                      }}
+                    />
+                    <div style={{ display: "flex", width: "100%" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          flex: 1,
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <div
+                          style={{
+                            fontSize: "32px",
+                            fontWeight: "700",
+                            color: colors.neutral,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          {talentBuilderScore ? talentBuilderScore.toLocaleString() : "-"}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: "16px",
+                            color: colors.neutral,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          Builder Score
+                        </div>
+                        <div
+                          style={{
+                            fontSize: "32px",
+                            fontWeight: "700",
+                            marginTop: "5px",
+                            color: colors.primary,
+                            display: "flex",
+                          }}
+                        >
+                          {talentBuilderRank ? `#${talentBuilderRank.toLocaleString()}` : "-"}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: "16px",
+                            color: colors.primary,
+                            display: "flex",
+                          }}
+                        >
+                          Builder Rank
+                        </div>
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+                        <div
+                          style={{
+                            fontSize: "32px",
+                            fontWeight: "700",
+                            color: colors.neutral,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          {talentCreatorScore ? talentCreatorScore.toLocaleString() : "-"}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: "16px",
+                            color: colors.neutral,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          Creator Score
+                        </div>
+                        <div
+                          style={{
+                            fontSize: "32px",
+                            fontWeight: "700",
+                            marginTop: "5px",
+                            color: colors.primary,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          {talentCreatorRank ? `#${talentCreatorRank.toLocaleString()}` : "-"}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: "16px",
+                            color: colors.primary,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          Creator Rank
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   <div
                     style={{
-                      fontSize: "20px",
-                      color: colors.neutral,
                       display: "flex",
+                      flexDirection: "column",
+                      border: `3px solid ${colors.base300}`,
+                      borderRadius: "10px",
+                      padding: "5px",
+                      flex: 0.25,
                       alignItems: "center",
-                      gap: "8px",
                     }}
                   >
-                    <span style={{ fontWeight: "600" }}>Quotient Rank:</span>
-                    <span style={{ fontWeight: "700" }}>
+                    <div
+                      style={{
+                        fontSize: "20px",
+                        fontWeight: "400",
+                        color: colors.neutral,
+                        display: "flex",
+                        alignItems: "flex-start",
+                        justifyContent: "center",
+                        opacity: 0.8,
+                      }}
+                    >
+                      Quotient
+                    </div>
+                    <hr
+                      style={{
+                        width: "100%",
+                        margin: "1px 0",
+                        borderColor: colors.base300,
+                        borderWidth: "1px",
+                        borderStyle: "solid",
+                      }}
+                    />
+                    <div
+                      style={{
+                        fontSize: "32px",
+                        fontWeight: "700",
+                        color: colors.neutral,
+                        display: "flex",
+                      }}
+                    >
+                      {quotientScore ? quotientScore.toFixed(3) : "-"}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "16px",
+                        color: colors.neutral,
+                        display: "flex",
+                      }}
+                    >
+                      Quotient Score
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "32px",
+                        fontWeight: "700",
+                        marginTop: "5px",
+                        color: colors.primary,
+                        display: "flex",
+                      }}
+                    >
                       {quotientRank ? `#${quotientRank.toLocaleString()}` : "-"}
-                    </span>
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "16px",
+                        color: colors.primary,
+                        display: "flex",
+                      }}
+                    >
+                      Quotient Rank
+                    </div>
+                    {quotientScore !== null && quotientScore !== undefined && (
+                      <span
+                        style={{
+                          fontSize: "13px",
+                          fontWeight: "600",
+                          padding: "4px 0px",
+                          borderRadius: "6px",
+                          marginTop: "5px",
+                          width: "100%",
+                          textAlign: "center",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          backgroundColor:
+                            getQuotientScoreLevel(quotientScore).level === "success"
+                              ? "rgba(16, 185, 129, 0.15)"
+                              : getQuotientScoreLevel(quotientScore).level === "warning"
+                                ? "rgba(245, 158, 11, 0.15)"
+                                : "rgba(239, 68, 68, 0.15)",
+                          border: `2px solid ${
+                            getQuotientScoreLevel(quotientScore).level === "success"
+                              ? colors.success
+                              : getQuotientScoreLevel(quotientScore).level === "warning"
+                                ? colors.warning
+                                : colors.error
+                          }`,
+                          color:
+                            getQuotientScoreLevel(quotientScore).level === "success"
+                              ? colors.success
+                              : getQuotientScoreLevel(quotientScore).level === "warning"
+                                ? colors.warning
+                                : colors.error,
+                          display: "flex",
+                        }}
+                      >
+                        {getQuotientScoreLevel(quotientScore).label}
+                      </span>
+                    )}
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      border: `3px solid ${colors.base300}`,
+                      borderRadius: "10px",
+                      padding: "5px",
+                      flex: 0.25,
+                      alignItems: "center",
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: "20px",
+                        fontWeight: "400",
+                        color: colors.neutral,
+                        display: "flex",
+                        alignItems: "flex-start",
+                        justifyContent: "center",
+                        opacity: 0.8,
+                      }}
+                    >
+                      Farcaster
+                    </div>
+                    <hr
+                      style={{
+                        width: "100%",
+                        margin: "1px 0",
+                        borderColor: colors.base300,
+                        borderWidth: "1px",
+                        borderStyle: "solid",
+                      }}
+                    />
+
+                    <div
+                      style={{
+                        fontSize: "32px",
+                        fontWeight: "700",
+                        color: colors.neutral,
+                        display: "flex",
+                      }}
+                    >
+                      {creatorScore ? creatorScore.toLocaleString() : "-"}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "16px",
+                        color: colors.neutral,
+                        display: "flex",
+                      }}
+                    >
+                      Creator Score
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "32px",
+                        fontWeight: "700",
+                        marginTop: "5px",
+                        color: colors.primary,
+                        display: "flex",
+                      }}
+                    >
+                      {creatorRank ? `#${creatorRank.toLocaleString()}` : "-"}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "16px",
+                        color: colors.primary,
+                        opacity: 1,
+                        display: "flex",
+                      }}
+                    >
+                      Creator Rank
+                    </div>
                   </div>
                 </div>
-              )}
+              </div>
             </div>
           </div>
 
@@ -748,20 +968,18 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
           <div
             style={{
               position: "absolute",
-              bottom: "45px",
-              right: "52px",
-              fontSize: "16px",
+              bottom: "20px",
+              left: "52px",
+              fontSize: "13.6px",
               color: colors.neutral,
               opacity: 0.5,
               display: "flex",
-              flexDirection: "column",
-              gap: "0px",
+              flexDirection: "row",
+              gap: "5px",
               alignItems: "flex-end",
             }}
           >
-            <p style={{ margin: 0 }}>Verify Users</p>
-            <p style={{ margin: 0 }}>Check Reputation</p>
-            <p style={{ margin: 0 }}>Avoid Spam</p>
+            <p style={{ margin: 0 }}>Verify Users · Check Reputation · Avoid Spam</p>
           </div>
 
           {/* Verification Stamp */}

@@ -18,9 +18,10 @@ async function fetchUserData(fid: number) {
   const userApiUrl = `${baseUrl}/api/user?fid=${fid}`;
   const creatorRewardsApiUrl = `${baseUrl}/api/creator-rewards?fid=${fid}`;
   const quotientScoreApiUrl = `${baseUrl}/api/quotient-score?fid=${fid}`;
+  const talentScoreApiUrl = `${baseUrl}/api/talent-protocol?fid=${fid}`;
 
   // Fetch all data in parallel
-  const [userResponse, creatorRewardsResponse, quotientScoreResponse] = await Promise.all([
+  const [userResponse, creatorRewardsResponse, quotientScoreResponse, talentScoreResponse] = await Promise.all([
     fetch(userApiUrl, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
@@ -32,6 +33,11 @@ async function fetchUserData(fid: number) {
       cache: "no-store",
     }),
     fetch(quotientScoreApiUrl, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+    }),
+    fetch(talentScoreApiUrl, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
       cache: "no-store",
@@ -75,6 +81,21 @@ async function fetchUserData(fid: number) {
       console.error("Failed to parse quotient score data:", error);
       // Continue without quotient score data
     }
+  }
+
+  // Add talent score data if available
+  if (talentScoreResponse.ok) {
+    try {
+      const talentScoreData = await talentScoreResponse.json();
+      if (talentScoreData) {
+        user.talentScore = talentScoreData;
+      }
+    } catch (error) {
+      console.error("Failed to parse talent score data:", error);
+      // Continue without talent score data
+    }
+  } else {
+    console.error("Failed to fetch talent score data:", talentScoreResponse.status, talentScoreResponse.statusText);
   }
 
   return user;
@@ -270,6 +291,32 @@ export async function POST(request: NextRequest) {
       attributes.push({
         trait_type: "Quotient Rank",
         value: user.quotientScore.rank,
+      });
+    }
+
+    // Add talent protocol attributes if available
+    if (user.talentScore?.builderScore?.points) {
+      attributes.push({
+        trait_type: "Talent Builder Score",
+        value: user.talentScore.builderScore.points,
+      });
+    }
+    if (user.talentScore?.builderScore?.rank) {
+      attributes.push({
+        trait_type: "Talent Builder Rank",
+        value: user.talentScore.builderScore.rank,
+      });
+    }
+    if (user.talentScore?.creatorScore?.points) {
+      attributes.push({
+        trait_type: "Talent Creator Score",
+        value: user.talentScore.creatorScore.points,
+      });
+    }
+    if (user.talentScore?.creatorScore?.rank) {
+      attributes.push({
+        trait_type: "Talent Creator Rank",
+        value: user.talentScore.creatorScore.rank,
       });
     }
 

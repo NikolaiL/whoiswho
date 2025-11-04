@@ -31,9 +31,10 @@ async function fetchUserData(fid: string) {
   const userApiUrl = `${baseUrl}/api/user?fid=${fid}`;
   const creatorRewardsApiUrl = `${baseUrl}/api/creator-rewards?fid=${fid}`;
   const quotientScoreApiUrl = `${baseUrl}/api/quotient-score?fid=${fid}`;
+  const talentScoreApiUrl = `${baseUrl}/api/talent-protocol?fid=${fid}`;
 
   // Fetch all data in parallel
-  const [userResponse, creatorRewardsResponse, quotientScoreResponse] = await Promise.all([
+  const [userResponse, creatorRewardsResponse, quotientScoreResponse, talentScoreResponse] = await Promise.all([
     fetch(userApiUrl, {
       method: "GET",
       headers: {
@@ -49,6 +50,13 @@ async function fetchUserData(fid: string) {
       next: { revalidate }, // 10 minutes to match image revalidation
     }),
     fetch(quotientScoreApiUrl, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      next: { revalidate }, // 10 minutes to match image revalidation
+    }),
+    fetch(talentScoreApiUrl, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -94,6 +102,19 @@ async function fetchUserData(fid: string) {
     }
   }
 
+  // Add talent score data if available
+  if (talentScoreResponse.ok) {
+    try {
+      const talentScoreData = await talentScoreResponse.json();
+      if (user && talentScoreData) {
+        user.talentScore = talentScoreData;
+      }
+    } catch (error) {
+      console.error("Failed to parse talent score data:", error);
+    }
+  } else {
+    console.error("Failed to fetch talent score data:", talentScoreResponse.status, talentScoreResponse.statusText);
+  }
   return user;
 }
 

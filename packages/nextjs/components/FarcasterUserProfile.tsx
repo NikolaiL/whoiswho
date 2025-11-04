@@ -840,7 +840,7 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
         <CardBody>
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-lg flex items-center gap-2">
-              Talent Protocol Scores
+              Talent Scores
               <InfoTooltip title="What is Talent Protocol?">
                 <p>
                   <strong>Talent Protocol</strong> is a reputation protocol that tracks and verifies builder and creator
