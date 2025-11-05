@@ -14,11 +14,9 @@ import { formatEther } from "viem";
 import { useAccount } from "wagmi";
 import { ArrowUpIcon, CheckIcon, ClipboardDocumentIcon, ShareIcon } from "@heroicons/react/24/outline";
 import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
-import { useCreatorRewards } from "~~/hooks/useCreatorRewards";
 import { useFarcasterUser } from "~~/hooks/useFarcasterUser";
 import { useQuotientScore } from "~~/hooks/useQuotientScore";
 import { useTalentProtocol } from "~~/hooks/useTalentProtocol";
-import { calculateReward, formatTimeRemaining } from "~~/types/creator-rewards";
 import { getQuotientScoreLevel } from "~~/types/quotient";
 import { transformImgurUrl } from "~~/utils/generateProfileImage";
 import { calculateFollowerRatio, getNeynarScoreLevel, parseSpamLabel } from "~~/utils/profileMetrics";
@@ -39,7 +37,6 @@ const FALLBACK_AVATAR = "https://farcaster.xyz/avatar.png";
 export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
   const { user, isLoading, error } = useFarcasterUser({ fid });
   const { data: quotientData, isLoading: isLoadingQuotient } = useQuotientScore({ fid });
-  const { data: creatorRewardsData, isLoading: isLoadingCreatorRewards } = useCreatorRewards({ fid });
   const { data: talentData, isLoading: isLoadingTalent } = useTalentProtocol({ fid });
   const {
     openLink,
@@ -589,150 +586,6 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
               </>
             )}
           </div>
-        </CardBody>
-      </Card>
-
-      {/* SECTION 2.7: FARCASTER CREATOR REWARDS */}
-      <Card variant="base" padding="default" className="max-w-2xl mx-auto my-6">
-        <CardBody>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-lg flex items-center gap-2">
-              Farcaster Creator Rewards
-              <InfoTooltip title="How to Earn?">
-                <div className="space-y-3">
-                  <div>
-                    <div className="flex items-center gap-2 mb-0">
-                      <span className="text-lg">✍️</span>
-                      <strong>Cast and Engage</strong>
-                    </div>
-                    <p className="text-xs">
-                      Your score is based on the engagement your casts receive, adjusted by the number of followers.
-                    </p>
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2 mb-0">
-                      <span className="text-lg">🏆</span>
-                      <strong>Get Ranked → Top 3000</strong>
-                    </div>
-                    <p className="text-xs">
-                      Each week, the top 3000 accounts with the highest scores receive USDC rewards.
-                    </p>
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2 mb-0">
-                      <span className="text-lg">💰</span>
-                      <strong>Receive USDC</strong>
-                    </div>
-                    <p className="text-xs mb-0">Rewards are sent to your connected Ethereum address on Base.</p>
-                  </div>
-                </div>
-              </InfoTooltip>
-            </h3>
-          </div>
-
-          {isLoadingCreatorRewards ? (
-            <div className="flex justify-center items-center py-8">
-              <span className="loading loading-spinner loading-md"></span>
-            </div>
-          ) : creatorRewardsData?.scores && creatorRewardsData?.metadata ? (
-            <>
-              <div className="grid grid-cols-2 gap-4">
-                {/* Your Score */}
-                <div className="rounded-xl border-2 border-base-300 p-4 bg-base-200/50">
-                  <h4 className="font-semibold text-sm mb-2 flex items-center gap-1">
-                    Score
-                    <InfoTooltip title="Current Period Score">
-                      <p>Your score for the current reward period.</p>
-                    </InfoTooltip>
-                  </h4>
-                  <div className="text-2xl font-bold text-primary">
-                    {creatorRewardsData.scores.currentPeriodScore.toLocaleString()}
-                  </div>
-                  <div className="text-xs text-base-content/60 mt-2">Current period</div>
-                </div>
-
-                {/* Your Rank */}
-                <div className="rounded-xl border-2 border-base-300 p-4 bg-base-200/50">
-                  <h4 className="font-semibold text-sm mb-2 flex items-center gap-1">
-                    Rank
-                    <InfoTooltip title="Current Period Rank">
-                      <p>Your ranking among all Farcaster creators for the current period.</p>
-                    </InfoTooltip>
-                  </h4>
-                  <div className="text-2xl font-bold text-primary">
-                    {creatorRewardsData?.scores?.currentPeriodRank
-                      ? `#${creatorRewardsData.scores.currentPeriodRank.toLocaleString()}`
-                      : "-"}
-                  </div>
-                  <div className="text-xs text-base-content/60 mt-2">Global ranking</div>
-                </div>
-
-                {/* Round Ends In */}
-                <div className="rounded-xl border-2 border-base-300 p-4 bg-base-200/50">
-                  <h4 className="font-semibold text-sm mb-2 flex items-center gap-1">
-                    Round Ends In
-                    <InfoTooltip title="Period End">
-                      <p>Time remaining until the current reward period ends.</p>
-                    </InfoTooltip>
-                  </h4>
-                  <div className="text-2xl font-bold text-warning">
-                    {formatTimeRemaining(creatorRewardsData.metadata.currentPeriodEndTimestamp)}
-                  </div>
-                  <div className="text-xs text-base-content/60 mt-2">
-                    {new Date(creatorRewardsData.metadata.currentPeriodEndTimestamp).toLocaleDateString()}
-                  </div>
-                </div>
-
-                {/* Your Reward */}
-                <div className="rounded-xl border-2 border-base-300 p-4 bg-base-200/50">
-                  <h4 className="font-semibold text-sm mb-2 flex items-center gap-1">
-                    Reward
-                    <InfoTooltip title="Estimated Reward">
-                      <p>
-                        Estimated USDC reward based on your current rank. Final rewards are distributed at the end of
-                        each period.
-                      </p>
-                    </InfoTooltip>
-                  </h4>
-                  <div className="text-2xl font-bold text-success">
-                    {calculateReward(
-                      creatorRewardsData?.scores?.currentPeriodRank || 0,
-                      creatorRewardsData?.metadata?.tiers || [],
-                    ).toFixed(2)}{" "}
-                    <span className="text-base">USDC</span>
-                  </div>
-                  <div className="text-xs text-base-content/60 mt-2">Estimated payout</div>
-                </div>
-              </div>
-
-              {/* Previous Period Stats (collapsed by default) */}
-              <details className="mt-4 collapse collapse-arrow border border-base-300 bg-base-200/30">
-                <summary className="collapse-title text-sm font-medium">Previous Period Stats</summary>
-                <div className="collapse-content">
-                  <div className="pt-2 space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-base-content/70">Previous Score:</span>
-                      <span className="text-sm font-mono">
-                        {creatorRewardsData?.scores?.previousPeriodScore
-                          ? creatorRewardsData.scores.previousPeriodScore.toLocaleString()
-                          : "-"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-base-content/70">All-Time Score:</span>
-                      <span className="text-sm font-mono">
-                        {creatorRewardsData?.scores?.allTimeScore
-                          ? creatorRewardsData.scores.allTimeScore.toLocaleString()
-                          : "-"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </details>
-            </>
-          ) : (
-            <div className="text-center py-8 text-base-content/50">No Creator Rewards data available</div>
-          )}
         </CardBody>
       </Card>
 

@@ -29,20 +29,12 @@ async function fetchUserData(fid: string) {
   const baseUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
 
   const userApiUrl = `${baseUrl}/api/user?fid=${fid}`;
-  const creatorRewardsApiUrl = `${baseUrl}/api/creator-rewards?fid=${fid}`;
   const quotientScoreApiUrl = `${baseUrl}/api/quotient-score?fid=${fid}`;
   const talentScoreApiUrl = `${baseUrl}/api/talent-protocol?fid=${fid}`;
 
   // Fetch all data in parallel
-  const [userResponse, creatorRewardsResponse, quotientScoreResponse, talentScoreResponse] = await Promise.all([
+  const [userResponse, quotientScoreResponse, talentScoreResponse] = await Promise.all([
     fetch(userApiUrl, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      next: { revalidate }, // 10 minutes to match image revalidation
-    }),
-    fetch(creatorRewardsApiUrl, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -71,21 +63,6 @@ async function fetchUserData(fid: string) {
 
   const userData = await userResponse.json();
   const user = userData.user || null;
-
-  // Add creator rewards data if available
-  if (creatorRewardsResponse.ok) {
-    try {
-      const creatorRewardsData = await creatorRewardsResponse.json();
-      if (user && creatorRewardsData?.scores) {
-        user.creatorRewards = {
-          score: creatorRewardsData.scores.currentPeriodScore,
-          rank: creatorRewardsData.scores.currentPeriodRank,
-        };
-      }
-    } catch (error) {
-      console.error("Failed to parse creator rewards data:", error);
-    }
-  }
 
   // Add quotient score data if available
   if (quotientScoreResponse.ok) {

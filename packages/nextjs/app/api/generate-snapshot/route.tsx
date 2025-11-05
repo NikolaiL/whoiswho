@@ -16,18 +16,12 @@ const MAX_MINTS_PER_HOUR = 5;
 async function fetchUserData(fid: number) {
   const baseUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
   const userApiUrl = `${baseUrl}/api/user?fid=${fid}`;
-  const creatorRewardsApiUrl = `${baseUrl}/api/creator-rewards?fid=${fid}`;
   const quotientScoreApiUrl = `${baseUrl}/api/quotient-score?fid=${fid}`;
   const talentScoreApiUrl = `${baseUrl}/api/talent-protocol?fid=${fid}`;
 
   // Fetch all data in parallel
-  const [userResponse, creatorRewardsResponse, quotientScoreResponse, talentScoreResponse] = await Promise.all([
+  const [userResponse, quotientScoreResponse, talentScoreResponse] = await Promise.all([
     fetch(userApiUrl, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-      cache: "no-store",
-    }),
-    fetch(creatorRewardsApiUrl, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
       cache: "no-store",
@@ -50,22 +44,6 @@ async function fetchUserData(fid: number) {
 
   const userData = await userResponse.json();
   const user = userData.user;
-
-  // Add creator rewards data if available
-  if (creatorRewardsResponse.ok) {
-    try {
-      const creatorRewardsData = await creatorRewardsResponse.json();
-      if (creatorRewardsData?.scores) {
-        user.creatorRewards = {
-          score: creatorRewardsData.scores.currentPeriodScore,
-          rank: creatorRewardsData.scores.currentPeriodRank,
-        };
-      }
-    } catch (error) {
-      console.error("Failed to parse creator rewards data:", error);
-      // Continue without creator rewards data
-    }
-  }
 
   // Add quotient score data if available
   if (quotientScoreResponse.ok) {
@@ -265,20 +243,6 @@ export async function POST(request: NextRequest) {
         value: user.farcaster?.user?.followingCount || user.following_count || 0,
       },
     ];
-
-    // Add creator rewards attributes if available
-    if (user.creatorRewards?.score) {
-      attributes.push({
-        trait_type: "Creator Score",
-        value: user.creatorRewards.score,
-      });
-    }
-    if (user.creatorRewards?.rank) {
-      attributes.push({
-        trait_type: "Creator Rank",
-        value: user.creatorRewards.rank,
-      });
-    }
 
     // Add quotient score attributes if available
     if (user.quotientScore?.score) {

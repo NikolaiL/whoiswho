@@ -128,10 +128,6 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
   const followerCount = user.farcaster?.user?.followerCount || user.follower_count || 0;
   const followingCount = user.farcaster?.user?.followingCount || user.following_count || 0;
 
-  // Get creator rewards data
-  const creatorScore = user.creatorRewards?.score || 0;
-  const creatorRank = user.creatorRewards?.rank || 0;
-
   // Get quotient score data
   const quotientScore = user.quotientScore?.score || 0;
   const quotientRank = user.quotientScore?.rank || 0;
@@ -377,7 +373,7 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
                   display: "flex",
                   alignItems: "center",
                   gap: "10px",
-                  marginTop: "0px",
+                  marginTop: "-5px",
                   height: "42px",
                 }}
               >
@@ -389,7 +385,7 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
                 style={{
                   fontSize: "32px",
                   color: colors.primary,
-                  marginTop: "-23px",
+                  marginTop: "-18px",
                   display: "flex",
                 }}
               >
@@ -643,7 +639,7 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
                       border: `3px solid ${colors.base300}`,
                       borderRadius: "10px",
                       padding: "5px",
-                      flex: 0.5,
+                      flex: 0.7,
                       alignItems: "center",
                     }}
                   >
@@ -781,7 +777,7 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
                       border: `3px solid ${colors.base300}`,
                       borderRadius: "10px",
                       padding: "5px",
-                      flex: 0.25,
+                      flex: 0.325,
                       alignItems: "center",
                     }}
                   >
@@ -883,81 +879,6 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
                         {getQuotientScoreLevel(quotientScore).label}
                       </span>
                     )}
-                  </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      border: `3px solid ${colors.base300}`,
-                      borderRadius: "10px",
-                      padding: "5px",
-                      flex: 0.25,
-                      alignItems: "center",
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontSize: "20px",
-                        fontWeight: "400",
-                        color: colors.neutral,
-                        display: "flex",
-                        alignItems: "flex-start",
-                        justifyContent: "center",
-                        opacity: 0.8,
-                      }}
-                    >
-                      Farcaster
-                    </div>
-                    <hr
-                      style={{
-                        width: "100%",
-                        margin: "1px 0",
-                        borderColor: colors.base300,
-                        borderWidth: "1px",
-                        borderStyle: "solid",
-                      }}
-                    />
-
-                    <div
-                      style={{
-                        fontSize: "32px",
-                        fontWeight: "700",
-                        color: colors.neutral,
-                        display: "flex",
-                      }}
-                    >
-                      {creatorScore ? creatorScore.toLocaleString() : "-"}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "16px",
-                        color: colors.neutral,
-                        display: "flex",
-                      }}
-                    >
-                      Creator Score
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "32px",
-                        fontWeight: "700",
-                        marginTop: "5px",
-                        color: colors.primary,
-                        display: "flex",
-                      }}
-                    >
-                      {creatorRank ? `#${creatorRank.toLocaleString()}` : "-"}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "16px",
-                        color: colors.primary,
-                        opacity: 1,
-                        display: "flex",
-                      }}
-                    >
-                      Creator Rank
-                    </div>
                   </div>
                 </div>
               </div>
