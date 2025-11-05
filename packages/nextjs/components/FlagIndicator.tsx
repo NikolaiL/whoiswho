@@ -38,8 +38,8 @@ export function FlagIndicator({ level, title, value, subtitle, explanation }: Fl
   return (
     <div className={`rounded-xl border-2 p-4 ${colorClasses[level]}`}>
       <div className="flex items-start justify-between mb-2">
-        <div className="flex items-center gap-2">
-          <h4 className="font-semibold text-sm">{title}</h4>
+        <div className="flex items-center align-middle gap-2">
+          <h4 className="font-semibold text-sm m-0">{title}</h4>
           {explanation && (
             <InfoTooltip
               title={

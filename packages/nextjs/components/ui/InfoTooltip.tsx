@@ -35,7 +35,7 @@ export function InfoTooltip({ title, children, className = "" }: InfoTooltipProp
     <div ref={tooltipRef} className={`relative inline-block ${className}`}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="btn btn-ghost btn-circle btn-xs hover:bg-base-300 transition-colors"
+        className="btn btn-ghost btn-circle btn-xs !min-h-0 !h-6 !w-6 hover:bg-base-300 transition-colors flex items-center justify-center p-0"
         aria-label="More information"
         type="button"
       >
@@ -43,11 +43,15 @@ export function InfoTooltip({ title, children, className = "" }: InfoTooltipProp
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 mt-2 left-1/2 -translate-x-1/2 w-80 animate-fade-in">
+        <div className="fixed sm:absolute z-50 mt-2 bottom-4 sm:bottom-auto left-4 right-4 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-80 max-w-[calc(100vw-2rem)] animate-fade-in">
           <div className="bg-base-100 border-2 border-secondary rounded-xl shadow-xl p-4">
             <div className="flex items-start justify-between mb-2">
               <h4 className="font-semibold text-sm flex items-center gap-2">{title}</h4>
-              <button onClick={() => setIsOpen(false)} className="btn btn-ghost btn-xs btn-circle" aria-label="Close">
+              <button
+                onClick={() => setIsOpen(false)}
+                className="-mt-1 btn btn-ghost btn-xs btn-circle !min-h-0 !h-6 !w-6 flex items-center justify-center p-0 shrink-0"
+                aria-label="Close"
+              >
                 ✕
               </button>
             </div>
