@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { InformationCircleIcon } from "@heroicons/react/24/outline";
+import { InformationCircleIcon, XCircleIcon } from "@heroicons/react/24/outline";
 
 interface InfoTooltipProps {
   title: React.ReactNode;
@@ -35,11 +35,11 @@ export function InfoTooltip({ title, children, className = "" }: InfoTooltipProp
     <div ref={tooltipRef} className={`relative inline-block ${className}`}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="btn btn-ghost btn-circle btn-xs !min-h-0 !h-6 !w-6 hover:bg-base-300 transition-colors flex items-center justify-center p-0"
+        className="btn btn-ghost btn-circle btn-xs !min-h-0 !h-8 !w-8 hover:bg-base-300 transition-colors flex items-center justify-center p-0"
         aria-label="More information"
         type="button"
       >
-        <InformationCircleIcon className="w-4 h-4 text-base-content/60 hover:text-base-content" />
+        <InformationCircleIcon className="w-5 h-5 text-base-content/60 hover:text-base-content" />
       </button>
 
       {isOpen && (
@@ -49,10 +49,10 @@ export function InfoTooltip({ title, children, className = "" }: InfoTooltipProp
               <h4 className="font-semibold text-sm flex items-center gap-2">{title}</h4>
               <button
                 onClick={() => setIsOpen(false)}
-                className="-mt-1 btn btn-ghost btn-xs btn-circle !min-h-0 !h-6 !w-6 flex items-center justify-center p-0 shrink-0"
+                className="-mt-1 btn btn-ghost btn-xs btn-circle !min-h-0 !h-8 !w-8 flex items-center justify-center p-0 shrink-0"
                 aria-label="Close"
               >
-                ✕
+                <XCircleIcon className="w-5 h-5 text-error/75 hover:text-error sm:text-base-content/60 sm:hover:text-base-content" />
               </button>
             </div>
             <div className="text-sm text-base-content/80 space-y-2">{children}</div>
