@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
 
     if (!accountResponse.ok) {
       const errorData = await accountResponse.text();
-      console.error("Talent Protocol Accounts API error:", accountResponse.status, errorData);
+      console.error("Talent Protocol Accounts API error:", accountResponse.status, errorData, fid);
       //   return NextResponse.json(
       //     { error: "Failed to fetch Talent Protocol account data" },
       //     { status: accountResponse.status },
@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
 
     if (!scoresResponse.ok) {
       const errorData = await scoresResponse.text();
-      console.error("Talent Protocol Scores API error:", scoresResponse.status, errorData);
+      console.error("Talent Protocol Scores API error:", scoresResponse.status, errorData, fid);
       //   return NextResponse.json(
       //     { error: "Failed to fetch Talent Protocol scores" },
       //     { status: scoresResponse.status },
