@@ -175,7 +175,15 @@ export default async function Image({ params }: { params: Promise<{ fid: string 
   // Check if this image is already being generated
   if (pendingGenerations.has(fid)) {
     console.log(new Date().toISOString(), "⏳ Waiting for pending generation for fid:", fid);
-    return pendingGenerations.get(fid)!;
+    // Wait for the generation to complete
+    await pendingGenerations.get(fid)!;
+    // After generation completes, return a new Response from cache
+    const cachedEntry = imageCache.get(fid);
+    if (cachedEntry) {
+      return new Response(cachedEntry.buffer, {
+        headers: cachedEntry.headers,
+      });
+    }
   }
 
   console.log(new Date().toISOString(), "🔄 Cache MISS - Generating OG for fid:", fid);
