@@ -78,11 +78,12 @@ async function getBannerImage(user: any): Promise<{ type: "image" | "gradient"; 
     }
   }
 
+  // removed picsum for now
   // Try picsum with shorter timeout (2s)
-  const picsumUrl = await fetchImageAsDataUrl("https://picsum.photos/1200/800", 2000);
-  if (picsumUrl) {
-    return { type: "image", value: picsumUrl };
-  }
+  // const picsumUrl = await fetchImageAsDataUrl("https://picsum.photos/1200/800", 2000);
+  // if (picsumUrl) {
+  //   return { type: "image", value: picsumUrl };
+  // }
 
   // Fallback to gradient
   const gradient = generateGradientFromFid(user.fid || user.fid_str || "0");

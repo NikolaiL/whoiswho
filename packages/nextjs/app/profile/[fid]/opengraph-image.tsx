@@ -153,7 +153,7 @@ async function generateImage(fid: string): Promise<Response> {
   return new Response(new Uint8Array(jpegBuffer), {
     headers: {
       "Content-Type": "image/jpeg",
-      "Cache-Control": "public, immutable,s-maxage=3600, stale-while-revalidate=86400, max-age=600",
+      "Cache-Control": "public, immutable, s-maxage=3600, max-age=3600, must-revalidate",
     },
   });
 }
