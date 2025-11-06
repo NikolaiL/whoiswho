@@ -29,6 +29,8 @@ interface FarcasterUserProfileProps {
 // Fallback avatar for users without pfp
 const FALLBACK_AVATAR = "https://farcaster.xyz/avatar.png";
 
+const timestamp = Date.now();
+
 /**
  * Farcaster User Profile Component
  * Displays comprehensive user information with quality score
@@ -509,9 +511,10 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
             {/* OG Image Preview */}
             <div className="relative w-full aspect-[3/2] rounded-lg overflow-hidden border-2 border-base-300">
               <Image
-                src={`/profile/${user.fid}/opengraph-image?t=${Date.now()}`}
+                src={`/profile/${user.fid}/opengraph-image?t=${timestamp}`}
                 alt={`${user.display_name} (@${user.username}) profile card`}
-                fill
+                width={1200}
+                height={800}
                 className="object-cover"
                 unoptimized
               />
