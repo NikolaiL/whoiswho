@@ -75,7 +75,7 @@ export function ClankerTokens({ fid }: ClankerTokensProps) {
       <CardBody>
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-lg flex items-center gap-2">
-            Clanker Tokens
+            Verified Clanker Tokens
             <Badge variant="primary" size="sm">
               {total}
             </Badge>

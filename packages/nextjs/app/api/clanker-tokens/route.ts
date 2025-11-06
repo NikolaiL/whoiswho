@@ -135,21 +135,23 @@ export async function GET(request: NextRequest) {
       });
     });
 
+    const filteredTokens = allTokens.filter(token => token.tags?.verified === true);
+
     // Sort by market cap (descending)
-    allTokens.sort((a, b) => {
+    filteredTokens.sort((a, b) => {
       const mcapA = a.related?.market?.marketCap || 0;
       const mcapB = b.related?.market?.marketCap || 0;
       return mcapB - mcapA;
     });
 
     // Return top 10 tokens
-    const topTokens = allTokens.slice(0, 10);
+    const topTokens = filteredTokens.slice(0, 100);
 
     // Return with cache headers
     return NextResponse.json(
       {
         tokens: topTokens,
-        total: allTokens.length,
+        total: filteredTokens.length,
       },
       {
         status: 200,
