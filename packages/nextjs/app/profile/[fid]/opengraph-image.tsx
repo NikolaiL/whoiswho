@@ -79,7 +79,32 @@ async function fetchUserData(fid: string) {
   }
 
   const userData = await userResponse.json();
-  const user = userData.user || null;
+  let user = userData.user || null;
+
+  // Check if birthday data is missing and refetch if needed
+  if (user && !user.birthday) {
+    console.log("Birthday data missing, refetching user data...");
+    try {
+      const refetchResponse = await fetch(userApiUrl, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+        },
+        cache: "no-store", // Bypass cache to get fresh data
+      });
+
+      if (refetchResponse.ok) {
+        const refetchData = await refetchResponse.json();
+        if (refetchData.user) {
+          user = refetchData.user;
+          console.log("User data refetched successfully");
+        }
+      }
+    } catch (error) {
+      console.error("Failed to refetch user data:", error);
+    }
+  }
 
   // Add quotient score data if available
   if (quotientScoreResponse) {

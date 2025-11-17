@@ -74,7 +74,35 @@ export function useFarcasterUser({ fid, viewerFid, enabled = true }: UseFarcaste
       }
 
       const data = await response.json();
-      setUser(data.user);
+      let userData = data.user;
+
+      // Check if birthday data is missing and refetch if needed
+      if (userData && !userData.birthday) {
+        console.log("Birthday data missing, refetching user data...");
+        try {
+          const refetchResponse = await fetch(`/api/user?${params.toString()}`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "Cache-Control": "no-cache, no-store, must-revalidate",
+            },
+            cache: "no-store", // Bypass cache to get fresh data
+          });
+
+          if (refetchResponse.ok) {
+            const refetchData = await refetchResponse.json();
+            if (refetchData.user) {
+              userData = refetchData.user;
+              console.log("User data refetched successfully");
+            }
+          }
+        } catch (refetchError) {
+          console.error("Failed to refetch user data:", refetchError);
+          // Continue with original data if refetch fails
+        }
+      }
+
+      setUser(userData);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
       setError(errorMessage);
