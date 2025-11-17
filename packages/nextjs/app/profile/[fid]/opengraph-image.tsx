@@ -32,8 +32,8 @@ async function fetchUserData(fid: string) {
   const quotientScoreApiUrl = `${baseUrl}/api/quotient-score?fid=${fid}`;
   const talentScoreApiUrl = `${baseUrl}/api/talent-protocol?fid=${fid}`;
 
-  // Fetch all data in parallel
-  const [userResponse, quotientScoreResponse, talentScoreResponse] = await Promise.all([
+  // Fetch all data in parallel using Promise.allSettled to handle individual failures
+  const results = await Promise.allSettled([
     fetch(userApiUrl, {
       method: "GET",
       headers: {
@@ -57,7 +57,24 @@ async function fetchUserData(fid: string) {
     }),
   ]);
 
-  if (!userResponse.ok) {
+  // Extract responses, handling rejected promises
+  const userResponse = results[0].status === "fulfilled" ? results[0].value : null;
+  const quotientScoreResponse = results[1].status === "fulfilled" ? results[1].value : null;
+  const talentScoreResponse = results[2].status === "fulfilled" ? results[2].value : null;
+
+  // Log any fetch failures
+  if (results[0].status === "rejected") {
+    console.error("User API fetch failed:", results[0].reason);
+  }
+  if (results[1].status === "rejected") {
+    console.error("Quotient score API fetch failed:", results[1].reason);
+  }
+  if (results[2].status === "rejected") {
+    console.error("Talent score API fetch failed:", results[2].reason);
+  }
+
+  // User data is required, return null if it failed
+  if (!userResponse || !userResponse.ok) {
     return null;
   }
 
@@ -65,32 +82,36 @@ async function fetchUserData(fid: string) {
   const user = userData.user || null;
 
   // Add quotient score data if available
-  if (quotientScoreResponse.ok) {
-    try {
-      const quotientScoreData = await quotientScoreResponse.json();
-      if (user && quotientScoreData?.data && quotientScoreData.data.length > 0) {
-        user.quotientScore = {
-          score: quotientScoreData.data[0].quotientScore,
-          rank: quotientScoreData.data[0].quotientRank,
-        };
+  if (quotientScoreResponse) {
+    if (quotientScoreResponse.ok) {
+      try {
+        const quotientScoreData = await quotientScoreResponse.json();
+        if (user && quotientScoreData?.data && quotientScoreData.data.length > 0) {
+          user.quotientScore = {
+            score: quotientScoreData.data[0].quotientScore,
+            rank: quotientScoreData.data[0].quotientRank,
+          };
+        }
+      } catch (error) {
+        console.error("Failed to parse quotient score data:", error);
       }
-    } catch (error) {
-      console.error("Failed to parse quotient score data:", error);
     }
   }
 
   // Add talent score data if available
-  if (talentScoreResponse.ok) {
-    try {
-      const talentScoreData = await talentScoreResponse.json();
-      if (user && talentScoreData) {
-        user.talentScore = talentScoreData;
+  if (talentScoreResponse) {
+    if (talentScoreResponse.ok) {
+      try {
+        const talentScoreData = await talentScoreResponse.json();
+        if (user && talentScoreData) {
+          user.talentScore = talentScoreData;
+        }
+      } catch (error) {
+        console.error("Failed to parse talent score data:", error);
       }
-    } catch (error) {
-      console.error("Failed to parse talent score data:", error);
+    } else {
+      console.error("Failed to fetch talent score data:", talentScoreResponse.status, talentScoreResponse.statusText);
     }
-  } else {
-    console.error("Failed to fetch talent score data:", talentScoreResponse.status, talentScoreResponse.statusText);
   }
   return user;
 }

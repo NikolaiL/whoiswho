@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from "next/server";
  * Data sources:
  * - Neynar API: Primary user data with quality scores
  * - Farcaster client API: Additional Farcaster-specific data (included as user.farcaster)
+ * - Altumbase API: Birthday data (included as user.birthday)
  *
  * Caching: Results are cached for 5 minutes to reduce API calls
  */
@@ -56,8 +57,11 @@ export async function GET(request: NextRequest) {
     const farcasterUrl = new URL("https://client.farcaster.xyz/v2/user-by-fid");
     farcasterUrl.searchParams.append("fid", fid);
 
-    // Fetch from both APIs in parallel
-    const [neynarResponse, farcasterResponse] = await Promise.all([
+    // Build Altumbase API URL for birthday data
+    const altumbaseUrl = `https://altumbase.com/api/userBirthdayStats/${fid}`;
+
+    // Fetch from all APIs in parallel using Promise.allSettled to handle individual failures
+    const results = await Promise.allSettled([
       fetch(neynarUrl.toString(), {
         method: "GET",
         headers: {
@@ -75,7 +79,36 @@ export async function GET(request: NextRequest) {
         // Cache the fetch request for 5 minutes
         next: { revalidate: 300 },
       }),
+      fetch(altumbaseUrl, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        // Cache the fetch request for 5 minutes
+        next: { revalidate: 300 },
+      }),
     ]);
+
+    // Extract responses, handling rejected promises
+    const neynarResponse = results[0].status === "fulfilled" ? results[0].value : null;
+    const farcasterResponse = results[1].status === "fulfilled" ? results[1].value : null;
+    const altumbaseResponse = results[2].status === "fulfilled" ? results[2].value : null;
+
+    // Log any fetch failures
+    if (results[0].status === "rejected") {
+      console.error("Neynar API fetch failed:", results[0].reason);
+    }
+    if (results[1].status === "rejected") {
+      console.error("Farcaster client API fetch failed:", results[1].reason);
+    }
+    if (results[2].status === "rejected") {
+      console.error("Altumbase API fetch failed:", results[2].reason);
+    }
+
+    // Neynar is required, return error if it failed
+    if (!neynarResponse) {
+      return NextResponse.json({ error: "Failed to fetch user data from Neynar" }, { status: 500 });
+    }
 
     if (!neynarResponse.ok) {
       const errorData = await neynarResponse.text();
@@ -87,15 +120,31 @@ export async function GET(request: NextRequest) {
 
     // Parse Farcaster client data (optional - don't fail if it errors)
     let farcasterData = null;
-    if (farcasterResponse.ok) {
-      try {
-        const farcasterResult = await farcasterResponse.json();
-        farcasterData = farcasterResult?.result || null;
-      } catch (err) {
-        console.error("Error parsing Farcaster client API response:", err);
+    if (farcasterResponse) {
+      if (farcasterResponse.ok) {
+        try {
+          const farcasterResult = await farcasterResponse.json();
+          farcasterData = farcasterResult?.result || null;
+        } catch (err) {
+          console.error("Error parsing Farcaster client API response:", err);
+        }
+      } else {
+        console.error("Farcaster client API error:", farcasterResponse.status, farcasterUrl);
       }
-    } else {
-      console.error("Farcaster client API error:", farcasterResponse.status, farcasterUrl);
+    }
+
+    // Parse Altumbase birthday data (optional - don't fail if it errors)
+    let altumbaseData = null;
+    if (altumbaseResponse) {
+      if (altumbaseResponse.ok) {
+        try {
+          altumbaseData = await altumbaseResponse.json();
+        } catch (err) {
+          console.error("Error parsing Altumbase API response:", err);
+        }
+      } else {
+        console.error("Altumbase API error:", altumbaseResponse.status, altumbaseUrl);
+      }
     }
 
     // Return the first user from the array (since we're querying by single FID)
@@ -105,6 +154,11 @@ export async function GET(request: NextRequest) {
       // Add farcaster data if available
       if (farcasterData) {
         user.farcaster = farcasterData;
+      }
+
+      // Add birthday data if available
+      if (altumbaseData) {
+        user.birthday = altumbaseData;
       }
 
       // Return with cache headers

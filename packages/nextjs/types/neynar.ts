@@ -137,6 +137,21 @@ export interface NeynarUser {
       publicSpamLabel?: string;
     };
   };
+  birthday?: {
+    fid: string;
+    birthday: string;
+    birthdayDate: string;
+    accountAgeDays: number;
+    lastBirthday: string;
+    daysFromLastBirthday: number;
+    nextBirthday: string;
+    daysUntilNextBirthday: number;
+    isBirthdayToday: boolean;
+    nextBirthdayNumber: number;
+    nextBirthdayOrdinal: string;
+    thisBirthdayNumber: number;
+    thisBirthdayOrdinal: string;
+  };
 }
 
 export interface NeynarUserResponse {

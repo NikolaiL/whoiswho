@@ -275,10 +275,25 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
               display: "flex",
               alignItems: "center",
               gap: "10px",
-              opacity: 0.15,
+              opacity: 0.0,
             }}
           >
             WhoIsWho
+          </div>
+
+          {/* Username */}
+          <div
+            style={{
+              fontSize: "54px",
+              fontWeight: "700",
+              color: colors.primary,
+              position: "absolute",
+              top: "35px",
+              left: "54px",
+              display: "flex",
+            }}
+          >
+            @{user.username}
           </div>
 
           {/* FID */}
@@ -293,7 +308,7 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
               display: "flex",
               alignItems: "center",
               gap: "10px",
-              opacity: 0.15,
+              opacity: 0.2,
               fontFamily: "Sixtyfour, monospace",
             }}
           >
@@ -363,48 +378,16 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
                 flexDirection: "column",
                 gap: "15px",
                 flex: 1,
+                marginTop: "2px",
               }}
             >
-              {/* Display Name */}
-              <div
-                style={{
-                  fontSize: "36px",
-                  fontWeight: "700",
-                  color: colors.neutral,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  marginTop: "-5px",
-                  height: "42px",
-                }}
-              >
-                <span>{user.display_name || " "}</span>
-              </div>
-
-              {/* Username */}
-              <div
-                style={{
-                  fontSize: "32px",
-                  color: colors.primary,
-                  marginTop: "-18px",
-                  display: "flex",
-                }}
-              >
-                @{user.username}
-              </div>
-
               {/* Follower and Creator Score Stats */}
               <div
                 style={{
                   display: "flex",
-                  position: "absolute",
-                  top: "0px",
-                  right: "0px",
-                  width: "300px",
                   gap: "15px",
                   marginTop: "0px",
-                  alignItems: "center",
-                  justifyContent: "center",
+                  width: "100%",
                 }}
               >
                 <div
@@ -420,7 +403,78 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
                 >
                   <div
                     style={{
-                      fontSize: "24px",
+                      fontSize: "20px",
+                      fontWeight: "700",
+                      color: colors.neutral,
+                      display: "flex",
+                    }}
+                  >
+                    {user.birthday.accountAgeDays} {user.birthday.accountAgeDays === 1 ? "day" : "days"}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "16px",
+                      color: colors.neutral,
+                      opacity: 0.6,
+                      display: "flex",
+                    }}
+                  >
+                    Account Age
+                  </div>
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    border: `3px solid ${colors.base300}`,
+                    borderRadius: "10px",
+                    padding: "5px",
+                    flex: 1,
+                    alignItems: "center",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "20px",
+                      fontWeight: "700",
+                      color: colors.neutral,
+                      display: "flex",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {(() => {
+                      const date = new Date(user.birthday.birthday);
+                      const day = date.getUTCDate().toString().padStart(2, "0");
+                      const month = date.toLocaleString("en-US", { month: "short", timeZone: "UTC" }).toUpperCase();
+                      const year = date.getUTCFullYear();
+                      return `${day}-${month}-${year}`;
+                    })()}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "16px",
+                      color: colors.neutral,
+                      opacity: 0.6,
+                      display: "flex",
+                    }}
+                  >
+                    Joined
+                  </div>
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    border: `3px solid ${colors.base300}`,
+                    borderRadius: "10px",
+                    padding: "5px",
+                    flex: 1,
+                    alignItems: "center",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "20px",
                       fontWeight: "700",
                       color: colors.neutral,
                       display: "flex",
@@ -452,7 +506,7 @@ export async function generateProfileImage({ user, size = { width: 1200, height:
                 >
                   <div
                     style={{
-                      fontSize: "24px",
+                      fontSize: "20px",
                       fontWeight: "700",
                       color: colors.neutral,
                       display: "flex",

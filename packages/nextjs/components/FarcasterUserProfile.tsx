@@ -317,6 +317,48 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
             </div>
           </div>
 
+          {/* Birthday */}
+          {user.birthday && (
+            <div className="mt-4 flex flex-col items-center justify-center gap-0 text-sm text-base-content/70">
+              <p className="text-xs text-base-content/50 mt-0.5">
+                Account Age{" "}
+                <span className="text-base-content font-bold">
+                  {user.birthday.accountAgeDays} {user.birthday.accountAgeDays === 1 ? "day" : "days"}
+                </span>
+              </p>
+              <p className="text-xs text-base-content/50 mt-0.5">
+                Joined Farcaster on{" "}
+                <span className="text-base-content font-bold">
+                  {new Date(user.birthday.birthday)
+                    .toLocaleString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      timeZone: "UTC",
+                      hour12: false,
+                    })
+                    .replace(/,/g, "")}{" "}
+                  UTC
+                </span>
+              </p>
+              <p className="text-xs text-base-content/50 mt-0.5">
+                <span className="text-base-content font-bold">{user.birthday.nextBirthdayOrdinal}</span> birthday is{" "}
+                {user.birthday.isBirthdayToday ? (
+                  <span className="text-base-content font-bold">today</span>
+                ) : (
+                  <span>
+                    in{" "}
+                    <span className="text-base-content font-bold">
+                      {user.birthday.daysUntilNextBirthday} {user.birthday.daysUntilNextBirthday === 1 ? "day" : "days"}
+                    </span>
+                  </span>
+                )}
+              </p>
+            </div>
+          )}
+
           {/* Location */}
           {user.profile?.location?.address && (
             <div className="mt-4 flex items-center justify-center gap-2 text-sm text-base-content/70">
