@@ -104,9 +104,9 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
     setIsSharing(true);
     try {
       const profileUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/profile/${user.fid}`;
-      let text = `Here is @${user.username}'s profile on WhoIsWho:\n\nVerify reputation, check flags, and avoid spam accounts - WhoIsWho by @nikolaii.eth\n\nLike it? Vote for it: https://devfolio.co/projects/farcaster-user-stats-miniapp-fc7c `;
+      let text = `Here is @${user.username}'s profile on WhoIsWho:\n\nVerify reputation, check flags, and avoid spam accounts - WhoIsWho by @nikolaii.eth`;
       if (fid == miniappUser?.fid) {
-        text = `Here is my profile on WhoIsWho:\n\nVerify reputation, check flags, and avoid spam accounts - WhoIsWho by @nikolaii.eth\n\nLike it? Vote for it: https://devfolio.co/projects/farcaster-user-stats-miniapp-fc7c `;
+        text = `Here is my profile on WhoIsWho:\n\nVerify reputation, check flags, and avoid spam accounts - WhoIsWho by @nikolaii.eth`;
       }
       await composeCast({
         text,
@@ -436,21 +436,6 @@ export function FarcasterUserProfile({ fid }: FarcasterUserProfileProps) {
           </div>
         </CardBody>
       </Card>
-
-      {/* Vote CTA */}
-      <div className="max-w-2xl mx-auto my-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <p className="text-sm">
-            Like it? Help us by voting for WhoIsWho in the Base Batches 002 Hackathon! Your support means a lot.
-          </p>
-          <button
-            onClick={() => openLink("https://devfolio.co/projects/farcaster-user-stats-miniapp-fc7c")}
-            className="btn btn-primary btn-sm shrink-0 w-full sm:w-auto"
-          >
-            Vote Now
-          </button>
-        </div>
-      </div>
 
       {/* SECTION 2: FLAGS (RISK INDICATORS) */}
       <Card variant="base" padding="default" className="max-w-2xl mx-auto my-6">
